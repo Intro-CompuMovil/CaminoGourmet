@@ -1,0 +1,19 @@
+.cont-img{
+    float: left;
+    width: 50%;
+    height: 50%;
+}
+
+.cont-herramientas{
+    width: 65vw;
+    height: 65vw;
+    margin: auto;
+    margin-top: 2vw;
+    border-radius: 1vw;
+    background-color: #eeec;
+    padding: 1vw 4vw;
+    box-shadow: 0.5vw 0.5vw 0.5vw #0007;
+    a{
+        color: #00f;
+    }
+}

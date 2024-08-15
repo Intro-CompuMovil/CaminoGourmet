@@ -1,0 +1,117 @@
+/* menu------------------------------------- */
+.menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #ffa500a3;
+    text-align: center;
+}
+
+.menu li {
+    float: left;
+}
+
+.menu li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.menu li a:hover {
+    background-color: #ffcc99; /* Light orange on hover */
+}
+
+/* general-------------------------------------  */
+
+body{
+    background-image: url(/images/fondo.jpg);
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+    font-family: "Ubuntu Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 250;
+    font-style: normal;
+    font-variation-settings: "width" 100;
+}
+
+.boton-home{
+    background-color: #c02a2ab8;
+    width: 4vw;
+    margin-left: 1vw;
+    margin-top: 1vw;
+    padding: 1vw;
+    text-align: center;
+    border: 0.25vw solid #8f0000;
+    border-radius: 3vw;
+    font-size: 3.5vw;
+    font-weight: 800;
+    cursor: pointer;
+    color: orange;
+    position: absolute;
+    top: -6%;
+    left: -11%;
+}
+
+.cont-copyright {
+    position: absolute;
+    top: 10px; /* Ajusta este valor para controlar la distancia desde el borde superior */
+    right: 10px; /* Ajusta este valor para controlar la distancia desde el borde derecho */
+    color: #fff;
+    width: 7vw;
+    z-index: 1; /* Asegura que el elemento esté por encima de otros elementos */
+    a {
+        color: #ffcd04;
+    }
+}
+
+.titulo {
+    background-color: #c02a2ab8;
+    color: #fff;
+    text-align: center;
+    padding: 1vw;
+    font-size: 4vw;
+    width: 80vw;
+    margin: auto;
+    margin-top: 3vw;
+    border-radius: 1vw;
+    font-family: "Bebas Neue", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    border: 0.5vw solid #8f0000;
+    position: relative;
+}
+
+.cont-texto{
+    width: 65vw;
+    margin: auto;
+    margin-top: 2vw;
+    border-radius: 1vw;
+    background-color: #eeec;
+    padding: 1vw 4vw;
+    box-shadow: 0.5vw 0.5vw 0.5vw #0007;
+    a{
+        color: #00f;
+    }
+}
+
+.texto{
+    font-size: 1.5vw;
+}
+
+.subtitulo{
+    background-color: #ffc79977;
+    padding: 0.5vw;
+    border-radius: 0.5vw;
+    text-align: center;
+    color: #fff;
+}
+
+.texto-requerimientos{
+    font-size: 1.5vw;
+    font-weight: 100;
+}

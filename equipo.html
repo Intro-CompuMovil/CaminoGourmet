@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>equipo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" type="text/css" href="/css/style-equipo.css">
+    <link rel="stylesheet" type="text/css" href="/css/style-general.css">
+</head>
+<header>
+    <div class="menu">
+        <ul>
+            <li><a href="equipo.html"><strong>EQUIPO</strong></a></li>
+            <li><a href="necesidad.html"><strong>NECESIDAD DEL MERCADO</strong></a></li>
+            <li><a href="solucion.html"><strong>SOLUCIÓN</strong></a></li>
+            <li><a href="herramientas.html"><strong>HERRAMIENTAS</strong></a></li>
+            <li><a href="diagramas.html"><strong>DIAGRAMAS</strong></a></li>
+        </ul>
+    </div>
+    <div class = "titulo">
+        <div class = "material-symbols-outlined boton-home" onclick="window.location = '/'">home</div>
+        Equipo
+    </div>
+</header>
+<body>
+    <div>
+        <p class = "cont-copyright">Imagen de <a href="https://pixabay.com/es/users/michasekdzi-16296060/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=6301597">Michal Dziekonski</a> en <a href="https://pixabay.com/es//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=6301597">Pixabay</a></p>
+    </div>
+    <div class="equipo__container">
+        
+        <ul class="equipo__container-list">
+            <li class="equipo__container-item">
+                <img src="images/juan.jpg" alt="" class="equipo__container-image">
+                <h2 class="equipo__container-name">
+                    Juan Garzón
+                </h2>
+                <div class="equipo__container-text">
+                    <p>
+                        Estudiante de ingeniería de sistemas
+                    </p>
+                    <ol>
+                        <li>Edad: 19 años</li>
+                        <li>Fuertes en la carrera: Frontend y bases de datos</li>
+                        <li>Hobbies: El gym y leer</li>
+                    </ol>
+                </div>
+            </li>
+            <li class="equipo__container-item">
+                <img src="/images/david.jpg" alt="" class="equipo__container-image">
+                <h2 class="equipo__container-name">
+                    David Solis
+                </h2>
+                <div class="equipo__container-text">
+                    <p>
+                        Estudiante de ingeniería de sistemas
+                    </p>
+                    <ol>
+                        <li>Edad: 22 años</li>
+                        <li>Fuertes en la carrera: Desarrollo frontend</li>
+                        <li>Hobbies: Hacer música y cantar</li>
+                    </ol>
+                </div>
+            </li>
+            <li class="equipo__container-item">
+                <img src="images/yo.jpg" alt="" class="equipo__container-image">
+                <h2 class="equipo__container-name">
+                    Juan David Ramirez
+                </h2>
+                <div class="equipo__container-text">
+                    <p class="equipo__container-text">
+                        Estudiante de ingeniería de sistemas
+                    </p>
+                    <ol>
+                        <li>Edad: 19 años</li>
+                        <li>Fuertes en la carrera: Liderazgo y planeación de proyectos junto a desarrollo front/back end</li>
+                        <li>Hobbies: Guitarra eléctrica, rock, ping pong, leer</li>
+                    </ol>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
