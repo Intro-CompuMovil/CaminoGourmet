@@ -2,7 +2,7 @@
 - <strong>Nombre del grupo:</strong> Los Backyardigans.
 - <strong>Integrantes:</strong> Juan David Ramírez Juzga, Juan Esteban Garzón Tinjacá, David Steven Solís Avilés.
 - <strong>Descripción del proyecto:</strong> Aplicación móvil de apoyo para los festivales del tipo “Master” como Burguer Master, Sushi Master, entre otros.  El objetivo principal de la aplicación es ofrecer rutas óptimas a los clientes para visitar restaurantes participantes de un festival.
-- <strong>Link wiki:</strong> https://camino-gourmet.vercel.app/diagramas.html
+- <strong>Link wiki:</strong> https://camino-gourmet.vercel.app
 - <strong>Mockups iniciales:</strong> Los mockups iniciales para las pantallas principales de la aplicación, pueden visualizarse [haciendo click aquí](https://www.figma.com/design/LwlAiurON0XasTE8tLAdEe/Mockups-CaminoGourmet?node-id=0-1&t=6syRNDCiiI5YUfts-1).
 
 ## Funcionalidades
