@@ -21,3 +21,6 @@
 - <strong>Rutas:</strong> Se calculan rutas óptimas para que el cliente pueda visitar los restaurantes de su preferencia. 
 - <strong>Sensor GPS:</strong> Se usa este sensor para capturar la ubicación del cliente, y a partir de ella, mostrar la ruta óptima para visitar los restaurantes de su preferencia. 
 - <strong>Sensor de huella:</strong> Se usa este sensor para autorizar los cambios de visibilidad/servicio del restaurante. 
+
+Comentarios Profesor
+Buen trabajo -> 5.0
