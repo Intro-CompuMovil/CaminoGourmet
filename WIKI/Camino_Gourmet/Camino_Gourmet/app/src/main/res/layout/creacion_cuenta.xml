@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="370dp"
+        android:layout_height="194dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="14dp"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imageView"
+        android:layout_centerHorizontal="true"
+        android:text="¡Crea tu Cuenta!"
+        android:textStyle="bold"
+        android:textSize="24sp"/>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView"
+        android:layout_centerHorizontal="true"
+        android:text="Registrate para poder usar nuestros servicios o si ya tienes cuenta "
+        android:textStyle="italic"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/Nombre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView2"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:padding="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Nombre" />
+
+    <EditText
+        android:id="@+id/Apellido"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/Nombre"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:padding="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Apellido" />
+
+    <EditText
+        android:id="@+id/Correo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/Apellido"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:padding="10dp"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:hint="Correo Electronico"/>
+
+    <EditText
+        android:id="@+id/NomUsuario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/Correo"
+        android:padding="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Nombre de Usuario" />
+
+    <EditText
+        android:id="@+id/Contraseña"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/NomUsuario"
+        android:ems="10"
+        android:padding="10dp"
+        android:inputType="textPassword"
+        android:hint="Contraseña"/>
+
+    <Switch
+        android:id="@+id/Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@id/Contraseña"
+        android:layout_centerHorizontal="true"
+        android:text="Soy un Restaurante"
+        android:onClick="onClick"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <EditText
+        android:id="@+id/Restaurante"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/Switch"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:padding="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Nombre de Restaurante" />
+
+    <Button
+        android:id="@+id/BotonIngreso"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/Restaurante"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:text="Ingresar"
+        android:backgroundTint="@color/Normal"/>
+
+
+
+</RelativeLayout>
+
+
