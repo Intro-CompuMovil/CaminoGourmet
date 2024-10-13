@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Data
 import com.example.camino_gourmet.data.Funciones
+import com.example.camino_gourmet.data.Sesion
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import org.osmdroid.api.IMapController
@@ -91,6 +92,8 @@ class Mapa: AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         menuInflater.inflate(R.menu.drawer_menu, menu)
+        //Ocultar boton si el usuario no es restaurante
+        menu?.findItem(R.id.miRestaurante)?.isVisible = Sesion.esRestaurante
         return super.onCreateOptionsMenu(menu)
     }
 

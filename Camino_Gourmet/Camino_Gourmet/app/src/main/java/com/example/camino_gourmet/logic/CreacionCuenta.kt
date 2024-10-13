@@ -11,13 +11,21 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Funciones
+import com.example.camino_gourmet.data.Restaurante
+import com.example.camino_gourmet.data.Usuario
+import kotlin.random.Random
 
 class
 CreacionCuenta: AppCompatActivity() {
-
-    private lateinit var switch: Switch
-    private lateinit var restaurante: EditText
-
+    lateinit var botonSoyRestaurante: Button
+    lateinit var textIniciarSesion : TextView
+    lateinit var botonCrearCuenta : Button
+    lateinit var nombre : EditText
+    lateinit var apellido : EditText
+    lateinit var correo : EditText
+    lateinit var usuario : EditText
+    lateinit var contrasena : EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,84 +33,58 @@ CreacionCuenta: AppCompatActivity() {
         setContentView(R.layout.creacion_cuenta)
 
         //Inicializacion de vistas
-        restaurante = findViewById<EditText>(R.id.Restaurante)
-        switch = findViewById<Switch>(R.id.Switch)
-        val TextView = findViewById<TextView>(R.id.InicioSesion)
-        val Button = findViewById<Button>(R.id.BotonIngreso)
-        val nombre = findViewById<EditText>(R.id.Nombre)
-        val apellido = findViewById<EditText>(R.id.Apellido)
-        val correo = findViewById<EditText>(R.id.Correo)
-        val usuario = findViewById<EditText>(R.id.NomUsuario)
-        val contrasena = findViewById<EditText>(R.id.Contraseña)
-        val restaurante = findViewById<EditText>(R.id.Restaurante)
+        textIniciarSesion = findViewById<TextView>(R.id.InicioSesion)
+        botonCrearCuenta = findViewById<Button>(R.id.BotonCrearCuenta)
+        nombre = findViewById<EditText>(R.id.Nombre)
+        apellido = findViewById<EditText>(R.id.Apellido)
+        correo = findViewById<EditText>(R.id.Correo)
+        usuario = findViewById<EditText>(R.id.NomUsuario)
+        contrasena = findViewById<EditText>(R.id.Contraseña)
+        botonSoyRestaurante = findViewById(R.id.soyRestaurante)
 
-        //Estado inicial del TextView Restaurante
-        restaurante.visibility = View.GONE
-
-        //Crear listener para el switch
-        switch.setOnClickListener { view ->
-            handleSwitchClick(view)
-        }
+        botonSoyRestaurante.setOnClickListener {clickSoyRestaurante()}
 
         //Crear listener para cuando se haga click en el TextView
-        TextView.setOnClickListener {
+        textIniciarSesion.setOnClickListener {
             val intent = Intent(this, InicioSesion::class.java)
             startActivity(intent)
         }
 
-        Button.setOnClickListener {
-            val nombre = nombre.text.toString()
-            val apellido = apellido.text.toString()
-            val correo = correo.text.toString()
-            val usuario = usuario.text.toString()
-            val contrasena = contrasena.text.toString()
-            val restaurante = restaurante.text.toString()
-
-            if (switch.isChecked){
-                if(nombre.isNotEmpty() && apellido.isNotEmpty() && correo.isNotEmpty() && usuario.isNotEmpty() && contrasena.isNotEmpty() && restaurante.isNotEmpty()){
-                    val intent = Intent(this, Opciones::class.java)
-                    startActivity(intent)
-                }
-
-                else
-                    Toast.makeText(this,"Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
-            }
-            else{
-                if(nombre.isNotEmpty() && apellido.isNotEmpty() && correo.isNotEmpty() && usuario.isNotEmpty() && contrasena.isNotEmpty()){
-                    val intent = Intent(this, Opciones::class.java)
-                    startActivity(intent)
-                }
-
-                else
-                    Toast.makeText(this,"Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
-            }
-
-
-        }
-
-            /*
-            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-                insets
-            }
-            */
-
-    }
-
-
-    private fun handleSwitchClick(view: View) {
-        if (view.id == R.id.Switch) {
-            //Mostrar u ocultar el TextView segun el estado del Switch
-            if (switch.isChecked)
-                restaurante.visibility = View.VISIBLE
-
-            else
-                restaurante.visibility = View.GONE
+        botonCrearCuenta.setOnClickListener {
+            validarCampos()
         }
     }
 
+    fun clickSoyRestaurante(){
+        val intent = Intent(this, CreacionCuentaRestaurante::class.java)
+        startActivity(intent)
+    }
 
+    fun validarCampos(){
+        val nombreText = nombre.text.toString()
+        val apellidoText = apellido.text.toString()
+        val correoText = correo.text.toString()
+        val usuarioText = usuario.text.toString()
+        val contrasenaText = contrasena.text.toString()
 
+        if(nombreText.isNotEmpty() && apellidoText.isNotEmpty() && correoText.isNotEmpty() && usuarioText.isNotEmpty() && contrasenaText.isNotEmpty()){
+            //Crear nuevo restaurante con valores por defecto
+            var nuevoRestaurante = Restaurante("","",0.0,0.0,0.0)
+
+            //Crear nuevo usuario con los valores introducidos
+            var nuevoUsuario = Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText,nuevoRestaurante)
+
+            //Crear nuevo objeto de usuario
+            var nuevoObjeto = Funciones.createNewUser(nuevoUsuario)
+
+            //Agregar usuario al json en internal storage
+            Funciones.addNewUserToUsuarios(this,nuevoObjeto)
+
+            val intent = Intent(this, InicioSesion::class.java)
+            startActivity(intent)
+        }
+        else
+            Toast.makeText(this,"Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
+    }
 }
 

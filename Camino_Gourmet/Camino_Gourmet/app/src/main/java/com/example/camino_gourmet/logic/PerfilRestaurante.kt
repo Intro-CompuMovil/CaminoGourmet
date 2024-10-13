@@ -3,12 +3,14 @@ package com.example.camino_gourmet.logic
 import ComentariosAdapter
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -18,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Comentario
+import com.example.camino_gourmet.data.Sesion
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStreamReader
@@ -48,6 +51,14 @@ class PerfilRestaurante : AppCompatActivity() {
         botonCalificarRestaurante = findViewById<Button>(R.id.botonCalificarRestaurante)
         botonCalificarRestaurante.setOnClickListener{clickBotonCalificarRestaurante()}
 
+        //Ocultar boton de calificar si el usuario es restaurante
+        if(Sesion.esRestaurante == false) {
+            botonCalificarRestaurante.visibility = View.VISIBLE
+        }else{
+            botonCalificarRestaurante.visibility = View.GONE
+        }
+
+
     }
 
     fun clickBotonCalificarRestaurante(){
@@ -75,6 +86,7 @@ class PerfilRestaurante : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         menuInflater.inflate(R.menu.drawer_menu, menu)
+        menu?.findItem(R.id.miRestaurante)?.isVisible = Sesion.esRestaurante
         return super.onCreateOptionsMenu(menu)
     }
 

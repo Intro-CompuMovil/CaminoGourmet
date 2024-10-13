@@ -22,6 +22,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Sesion
 
 class CalificarRestaurante : AppCompatActivity() {
 
@@ -118,6 +119,8 @@ class CalificarRestaurante : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         menuInflater.inflate(R.menu.drawer_menu, menu)
+        //Ocultar boton si el usuario no es restaurante
+        menu?.findItem(R.id.miRestaurante)?.isVisible = Sesion.esRestaurante
         return super.onCreateOptionsMenu(menu)
     }
 
