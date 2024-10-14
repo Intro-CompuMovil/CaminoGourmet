@@ -43,28 +43,68 @@
         android:gravity="center"
         android:layout_marginTop="35dp">
 
-        <ImageView
-            android:id="@+id/Hamburger"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:padding="5dp"
-            android:src="@drawable/hamburguesa_icon"/>
-
-        <ImageView
-            android:id="@+id/Sushi"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:padding="5dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            >
+            <ImageView
+                android:id="@+id/Hamburger"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:padding="5dp"
+                android:src="@drawable/hamburguesa_icon"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hamburguesa"
+                android:textStyle="bold"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
             android:layout_marginStart="16dp"
-            android:src="@drawable/sushi_icon"/>
+            >
+            <ImageView
+                android:id="@+id/Sushi"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:padding="5dp"
+                android:src="@drawable/sushi_icon"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sushi"
+                android:textStyle="bold"
+                />
+        </LinearLayout>
 
-        <ImageView
-            android:id="@+id/Pizza"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:padding="5dp"
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
             android:layout_marginStart="16dp"
-            android:src="@drawable/pizza_icon"/>
+            >
+            <ImageView
+                android:id="@+id/Pizza"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:padding="5dp"
+                android:src="@drawable/pizza_icon"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pizza"
+                android:textStyle="bold"
+                />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>
