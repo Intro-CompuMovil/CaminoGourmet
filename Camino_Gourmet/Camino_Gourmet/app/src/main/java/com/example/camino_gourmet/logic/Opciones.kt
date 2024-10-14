@@ -8,6 +8,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Sesion
 
 class Opciones: AppCompatActivity() {
 
@@ -44,10 +45,9 @@ class Opciones: AppCompatActivity() {
     }
 
     private fun  TipoRestaurante(tipo: String) {
-        val intent = Intent(this, Mapa::class.java).apply {
-            putExtra("TipoRestaurante", tipo)
-        }
-        startActivity(intent)
+        Sesion.restaurantMode = tipo
+        val intentMapa = Intent(this, Mapa::class.java)
+        startActivity(intentMapa)
     }
 
 

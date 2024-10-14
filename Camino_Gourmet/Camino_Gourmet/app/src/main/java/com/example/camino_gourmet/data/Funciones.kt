@@ -65,17 +65,37 @@ class Funciones {
         }
 
         //Copiar archivo desde assets a internal storage para poder actualizarlo
-        fun copyJsonToInternalStorageIfNeeded(context: Context, fileName: String) {
-            if (!isFileCopied(context)) {
+        fun copyJsonToInternalStorageIfNeededUsers(context: Context) {
+            if (!isFileCopiedUsers(context)) {
                 try {
-                    val inputStream = context.assets.open(fileName)
-                    val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
+                    val inputStream = context.assets.open("usuarios.json")
+                    val outputStream = context.openFileOutput("usuarios.json", Context.MODE_PRIVATE)
                     inputStream.copyTo(outputStream)
                     inputStream.close()
                     outputStream.close()
 
                     // Set the flag after successful copying
-                    setFileCopied(context)
+                    setFileCopiedUsers(context)
+
+                } catch (e: IOException) {
+                    Log.e("Funciones", "Error copying file: ${e.message}")
+                }
+            } else {
+                Log.d("Funciones", "File already copied, skipping...")
+            }
+        }
+
+        fun copyJsonToInternalStorageIfNeededComments(context: Context) {
+            if (!isFileCopiedComments(context)) {
+                try {
+                    val inputStream = context.assets.open("comentarios.json")
+                    val outputStream = context.openFileOutput("comentarios.json", Context.MODE_PRIVATE)
+                    inputStream.copyTo(outputStream)
+                    inputStream.close()
+                    outputStream.close()
+
+                    // Set the flag after successful copying
+                    setFileCopiedComments(context)
 
                 } catch (e: IOException) {
                     Log.e("Funciones", "Error copying file: ${e.message}")
@@ -89,6 +109,20 @@ class Funciones {
         fun loadUsersJSONFromInternalStorage(context: Context): String? {
             return try {
                 val inputStream: InputStream = context.openFileInput("usuarios.json")
+                val size: Int = inputStream.available()
+                val buffer = ByteArray(size)
+                inputStream.read(buffer)
+                inputStream.close()
+                String(buffer, Charsets.UTF_8)
+            } catch (ex: IOException) {
+                Log.e("Funciones", "Error reading the file: ${ex.message}")
+                null
+            }
+        }
+
+        fun loadCommentsJSONFromInternalStorage(context: Context): String? {
+            return try {
+                val inputStream: InputStream = context.openFileInput("comentarios.json")
                 val size: Int = inputStream.available()
                 val buffer = ByteArray(size)
                 inputStream.read(buffer)
@@ -129,6 +163,45 @@ class Funciones {
             }
         }
 
+        fun addNewCommentToComentarios(context: Context, newComment: JSONObject) {
+            try {
+                // Load the existing JSON file
+                val commentsJSON = loadCommentsJSONFromInternalStorage(context)
+
+                if (commentsJSON != null) {
+                    // Convert the loaded JSON string to a JSONObject
+                    val jsonObject = JSONObject(commentsJSON)
+                    val commentsArray = jsonObject.getJSONArray("comentarios")
+
+                    // Create a new JSONArray to store the new order of comments
+                    val updatedCommentsArray = JSONArray()
+
+                    // Add the new comment to the start of the array
+                    updatedCommentsArray.put(newComment)
+
+                    // Add the existing comments after the new comment
+                    for (i in 0 until commentsArray.length()) {
+                        updatedCommentsArray.put(commentsArray.get(i))
+                    }
+
+                    // Update the original JSONObject with the new array
+                    jsonObject.put("comentarios", updatedCommentsArray)
+
+                    // Write the updated JSON back to internal storage
+                    val updatedJSON = jsonObject.toString()
+                    val outputStream: FileOutputStream = context.openFileOutput("comentarios.json", Context.MODE_PRIVATE)
+                    outputStream.write(updatedJSON.toByteArray())
+                    outputStream.close()
+
+                    Log.d("Funciones", "Comment added successfully at the start.")
+                } else {
+                    Log.e("Funciones", "Failed to load existing JSON file.")
+                }
+            } catch (ex: Exception) {
+                Log.e("Funciones", "Error updating JSON file: ${ex.message}")
+            }
+        }
+
         //Obtener usuario por username
         fun getUserByUsername(context: Context, username: String): Usuario? {
             val jsonString = loadUsersJSONFromInternalStorage(context) ?: return null
@@ -155,17 +228,41 @@ class Funciones {
             }
         }
 
+        fun createNewComment(comentario : Comentario): JSONObject {
+            return JSONObject().apply {
+                put("nombre_completo", comentario.nombre_completo)
+                put("calificacion", comentario.calificacion)
+                put("fecha", comentario.fecha)
+                put("descripcion", comentario.descripcion)
+
+            }
+        }
+
         //Verificar si el archivo ya fue copiado
-        fun isFileCopied(context: Context): Boolean {
+        fun isFileCopiedUsers(context: Context): Boolean {
             val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            return sharedPref.getBoolean("isFileCopied", false)
+            return sharedPref.getBoolean("isFileCopiedUsers", false)
         }
 
         //Establecer que el archivo ya fue copiado
-        fun setFileCopied(context: Context) {
+        fun setFileCopiedUsers(context: Context) {
             val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
             with(sharedPref.edit()) {
-                putBoolean("isFileCopied", true)
+                putBoolean("isFileCopiedUsers", true)
+                apply() // Save the flag as true
+            }
+        }
+
+        fun isFileCopiedComments(context: Context): Boolean {
+            val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            return sharedPref.getBoolean("isFileCopiedComments", false)
+        }
+
+        //Establecer que el archivo ya fue copiado
+        fun setFileCopiedComments(context: Context) {
+            val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putBoolean("isFileCopiedComments", true)
                 apply() // Save the flag as true
             }
         }

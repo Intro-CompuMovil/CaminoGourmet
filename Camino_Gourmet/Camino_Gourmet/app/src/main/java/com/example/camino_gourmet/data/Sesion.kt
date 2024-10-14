@@ -2,6 +2,7 @@ package com.example.camino_gourmet.data
 
 class Sesion {
     companion object {
+        var restaurantMode = ""
         var userName = ""
         var nombre = ""
         var apellido = ""

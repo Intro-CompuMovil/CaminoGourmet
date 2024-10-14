@@ -40,7 +40,7 @@
                 android:layout_marginBottom="20dp"
                 android:numStars="5"
                 android:progressTint="@color/naranjaPrincipal"
-                android:stepSize="1" />
+                android:stepSize="0.5" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -51,7 +51,7 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/editTextText"
+                android:id="@+id/editComentario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -124,6 +124,7 @@
 
 
     <Button
+        android:id="@+id/botonCalificar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Calificar"

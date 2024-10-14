@@ -23,7 +23,9 @@ class InicioSesion : AppCompatActivity() {
         setContentView(R.layout.inicio_sesion)
 
         //Copiar archivo json desde assets a internal storage (si es necesario)
-        Funciones.copyJsonToInternalStorageIfNeeded(this, "usuarios.json")
+        Funciones.copyJsonToInternalStorageIfNeededUsers(this)
+        Funciones.copyJsonToInternalStorageIfNeededComments(this)
+
 
         contrasena = findViewById<EditText>(R.id.Contraseña)
         nombre = findViewById<EditText>(R.id.Usuario)

@@ -63,7 +63,8 @@ class Mapa: AppCompatActivity() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Recibir el tipo de restaurante seleccionado
-        Restaurante = intent.getStringExtra("TipoRestaurante") ?: ""
+        Restaurante = Sesion.restaurantMode
+
         Funciones.guardarRestaurantesjson(this, Restaurante)
         val Button = findViewById<Button>(R.id.button)
 
@@ -81,10 +82,11 @@ class Mapa: AppCompatActivity() {
             */
 
         Button.setOnClickListener {
-            val intent = Intent(this, Paradas::class.java).apply {
+
+            val intentParadas = Intent(this, Paradas::class.java).apply {
                 putExtra("TipoRestaurante", Restaurante)
             }
-            startActivity(intent)
+            startActivity(intentParadas)
         }
 
     }
