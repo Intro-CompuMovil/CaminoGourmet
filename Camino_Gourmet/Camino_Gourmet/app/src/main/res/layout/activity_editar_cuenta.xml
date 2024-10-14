@@ -46,7 +46,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editContrasenaActual"
+            android:id="@+id/editNombre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -67,7 +67,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editNuevaContrasena"
+            android:id="@+id/editApellido"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -88,7 +88,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editConfirmarContrasena"
+            android:id="@+id/editEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -121,7 +121,7 @@
 
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/botonEditarCuenta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Guardar cambios"

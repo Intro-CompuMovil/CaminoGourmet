@@ -6,12 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -40,6 +35,7 @@ import com.example.camino_gourmet.data.Data.Companion.latitude
 import com.example.camino_gourmet.data.Data.Companion.longitude
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Restaurant
+import com.example.camino_gourmet.data.Sesion
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -126,7 +122,8 @@ class Mapa: AppCompatActivity() {
 
 
         // Recibir el tipo de restaurante seleccionado
-        Restaurante = intent.getStringExtra("TipoRestaurante") ?: ""
+        Restaurante = Sesion.restaurantMode
+
         Funciones.guardarRestaurantesjson(this, Restaurante)
         val Button = findViewById<Button>(R.id.button)
         boton = findViewById<Button>(R.id.botonCentrar)
@@ -149,10 +146,11 @@ class Mapa: AppCompatActivity() {
         */
 
         Button.setOnClickListener {
-            val intent = Intent(this, Paradas::class.java).apply {
+
+            val intentParadas = Intent(this, Paradas::class.java).apply {
                 putExtra("TipoRestaurante", Restaurante)
             }
-            startActivity(intent)
+            startActivity(intentParadas)
         }
 
         boton.setOnClickListener {
@@ -271,6 +269,8 @@ class Mapa: AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         menuInflater.inflate(R.menu.drawer_menu, menu)
+        //Ocultar boton si el usuario no es restaurante
+        menu?.findItem(R.id.miRestaurante)?.isVisible = Sesion.esRestaurante
         return super.onCreateOptionsMenu(menu)
     }
 

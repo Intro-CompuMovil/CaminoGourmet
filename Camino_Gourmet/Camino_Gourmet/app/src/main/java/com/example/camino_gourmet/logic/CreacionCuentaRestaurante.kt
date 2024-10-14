@@ -1,63 +1,59 @@
 package com.example.camino_gourmet.logic
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Switch
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Restaurante
 import com.example.camino_gourmet.data.Usuario
 import kotlin.random.Random
 
-class
-CreacionCuenta: AppCompatActivity() {
-    lateinit var botonSoyRestaurante: Button
+class CreacionCuentaRestaurante : AppCompatActivity() {
+
     lateinit var textIniciarSesion : TextView
-    lateinit var botonCrearCuenta : Button
+    lateinit var botonCrearCuentaRestaurante : Button
     lateinit var nombre : EditText
     lateinit var apellido : EditText
     lateinit var correo : EditText
     lateinit var usuario : EditText
     lateinit var contrasena : EditText
+    lateinit var nombreRestaurante : EditText
+    lateinit var latitud : EditText
+    lateinit var longitud : EditText
+    lateinit var spinnerCategoria : Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        /*enableEdgeToEdge()*/
-        setContentView(R.layout.creacion_cuenta)
-
-        //Inicializacion de vistas
+        setContentView(R.layout.activity_creacion_cuenta_restaurante)
         textIniciarSesion = findViewById<TextView>(R.id.InicioSesion)
-        botonCrearCuenta = findViewById<Button>(R.id.BotonCrearCuenta)
+        botonCrearCuentaRestaurante = findViewById<Button>(R.id.BotonCrearCuenta)
+        spinnerCategoria = findViewById<Spinner>(R.id.spinnerCategoria)
         nombre = findViewById<EditText>(R.id.Nombre)
         apellido = findViewById<EditText>(R.id.Apellido)
         correo = findViewById<EditText>(R.id.Correo)
         usuario = findViewById<EditText>(R.id.NomUsuario)
         contrasena = findViewById<EditText>(R.id.Contraseña)
-        botonSoyRestaurante = findViewById(R.id.soyRestaurante)
+        nombreRestaurante = findViewById<EditText>(R.id.nombreRestaurante)
+        latitud = findViewById<EditText>(R.id.latitud)
+        longitud = findViewById<EditText>(R.id.longitud)
 
-        botonSoyRestaurante.setOnClickListener {clickSoyRestaurante()}
-
-        //Crear listener para cuando se haga click en el TextView
         textIniciarSesion.setOnClickListener {
             val intent = Intent(this, InicioSesion::class.java)
             startActivity(intent)
         }
 
-        botonCrearCuenta.setOnClickListener {
+        botonCrearCuentaRestaurante.setOnClickListener{
             validarCampos()
         }
-    }
-
-    fun clickSoyRestaurante(){
-        val intent = Intent(this, CreacionCuentaRestaurante::class.java)
-        startActivity(intent)
     }
 
     fun validarCampos(){
@@ -66,10 +62,12 @@ CreacionCuenta: AppCompatActivity() {
         val correoText = correo.text.toString()
         val usuarioText = usuario.text.toString()
         val contrasenaText = contrasena.text.toString()
-
-        if(nombreText.isNotEmpty() && apellidoText.isNotEmpty() && correoText.isNotEmpty() && usuarioText.isNotEmpty() && contrasenaText.isNotEmpty()){
-            //Crear nuevo restaurante con valores por defecto
-            var nuevoRestaurante = Restaurante("","",0.0,0.0,0.0)
+        val nombreRestauranteText = nombreRestaurante.text.toString()
+        val latitudText = latitud.text.toString()
+        val longitudText = longitud.text.toString()
+        if(nombreText.isNotEmpty() && apellidoText.isNotEmpty() && correoText.isNotEmpty() && usuarioText.isNotEmpty() && contrasenaText.isNotEmpty() && nombreRestauranteText.isNotEmpty() && latitudText.isNotEmpty() && longitudText.isNotEmpty()){
+            //Crear nuevo restaurante
+            var nuevoRestaurante = Restaurante(nombreRestauranteText,spinnerCategoria.getSelectedItem().toString(),0.0,longitudText.toDoubleOrNull() ?: 0.0,latitudText.toDoubleOrNull() ?: 0.0)
 
             //Crear nuevo usuario con los valores introducidos
             var nuevoUsuario = Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText,nuevoRestaurante)
@@ -82,9 +80,9 @@ CreacionCuenta: AppCompatActivity() {
 
             val intent = Intent(this, InicioSesion::class.java)
             startActivity(intent)
-        }
-        else
+
+        }else
             Toast.makeText(this,"Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
+
     }
 }
-

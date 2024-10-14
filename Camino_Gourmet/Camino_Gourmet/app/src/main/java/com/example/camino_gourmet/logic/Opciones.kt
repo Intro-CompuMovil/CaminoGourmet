@@ -15,6 +15,7 @@ import com.example.camino_gourmet.data.Data
 import com.example.camino_gourmet.data.Restaurant
 import org.osmdroid.api.IMapController
 import java.util.ArrayList
+import com.example.camino_gourmet.data.Sesion
 
 class Opciones: AppCompatActivity() {
 
@@ -52,10 +53,9 @@ class Opciones: AppCompatActivity() {
     }
 
     private fun  TipoRestaurante(tipo: String) {
-        val intent = Intent(this, Mapa::class.java).apply {
-            putExtra("TipoRestaurante", tipo)
-        }
-        startActivity(intent)
+        Sesion.restaurantMode = tipo
+        val intentMapa = Intent(this, Mapa::class.java)
+        startActivity(intentMapa)
     }
 
     override fun onResume() {
