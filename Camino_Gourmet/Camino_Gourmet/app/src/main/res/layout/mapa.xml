@@ -33,7 +33,16 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/textView4"
             android:layout_centerHorizontal="true"
-            android:text="Editar Ruta"
+            android:text="Buscar Destinos"
+            android:backgroundTint="@color/Normal"/>
+
+        <Button
+            android:id="@+id/botonCentrar"
+            android:layout_below="@id/textView5"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Centrar Ubicacion"
             android:backgroundTint="@color/Normal"/>
 
         <TextView
@@ -49,15 +58,26 @@
 
 
     </RelativeLayout>
-    <org.osmdroid.views.MapView
-        android:id="@+id/osmMap"
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <org.osmdroid.views.MapView
+            android:id="@+id/osmMap"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </FrameLayout>
+
+
 </LinearLayout>
 
 

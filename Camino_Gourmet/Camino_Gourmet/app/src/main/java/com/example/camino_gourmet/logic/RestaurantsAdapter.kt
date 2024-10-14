@@ -1,17 +1,23 @@
 package com.example.camino_gourmet.logic
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Data
 import com.example.camino_gourmet.data.Restaurant
 
 class RestaurantsAdapter(context: Context?, private val restaurantes: List<Restaurant>): ArrayAdapter<Restaurant>(context!!, 0, restaurantes) {
+    @SuppressLint("ResourceAsColor")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         // Obtener el restaurante en la posición actual
         val restaurante = getItem(position)
@@ -24,6 +30,7 @@ class RestaurantsAdapter(context: Context?, private val restaurantes: List<Resta
         val categoriaRestaurante = view.findViewById<ImageView>(R.id.logo)
         val calificacionRestaurante = view.findViewById<TextView>(R.id.Calificacion)
         val perfilButton = view.findViewById<TextView>(R.id.Perfil)
+        val añadirButton = view.findViewById<Button>(R.id.Añadir)
 
         // Poblar los datos del restaurante en las vistas
         nombreRestaurante.text = restaurante?.nombre
@@ -40,6 +47,30 @@ class RestaurantsAdapter(context: Context?, private val restaurantes: List<Resta
             intent.putExtra("puntaje",restaurante?.calificacion)
             context.startActivity(intent)
         }
+
+        if (Data.RESTAURANT_ROUTE.contains(restaurante)){
+                añadirButton.setBackgroundColor(Color.GREEN)
+                añadirButton.setText("Cancelar")
+        }
+
+
+        añadirButton.setOnClickListener {
+            if (Data.RESTAURANT_ROUTE.contains(restaurante)){
+                Data.RESTAURANT_ROUTE.remove(restaurante)
+                añadirButton.setBackgroundColor(Color.RED)
+                añadirButton.setText("Añadir")
+                Toast.makeText(context,"Restaurante eliminado", Toast.LENGTH_SHORT).show()
+            }else {
+                if (restaurante != null) {
+                    Data.RESTAURANT_ROUTE.add(restaurante)
+                }
+                añadirButton.setBackgroundColor(Color.GREEN)
+                añadirButton.setText("Cancelar")
+                Toast.makeText(context,"Restaurante añadido", Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
 
         return view
     }

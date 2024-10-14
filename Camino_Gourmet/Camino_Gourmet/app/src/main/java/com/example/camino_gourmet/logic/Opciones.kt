@@ -1,13 +1,20 @@
 package com.example.camino_gourmet.logic
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Data
+import com.example.camino_gourmet.data.Restaurant
+import org.osmdroid.api.IMapController
+import java.util.ArrayList
 
 class Opciones: AppCompatActivity() {
 
@@ -16,6 +23,7 @@ class Opciones: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         /*enableEdgeToEdge()*/
         setContentView(R.layout.opciones)
+        Data.RESTAURANT_ROUTE = ArrayList<Restaurant>()
 
         //Inicializacion de vistas
         val Hamburger = findViewById<ImageView>(R.id.Hamburger)
@@ -48,6 +56,11 @@ class Opciones: AppCompatActivity() {
             putExtra("TipoRestaurante", tipo)
         }
         startActivity(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Data.RESTAURANT_ROUTE = ArrayList<Restaurant>()
     }
 
 

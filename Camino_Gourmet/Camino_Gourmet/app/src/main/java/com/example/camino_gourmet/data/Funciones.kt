@@ -3,10 +3,12 @@ package com.example.camino_gourmet.data
 
 import android.content.Context
 import android.util.Log
+import com.example.camino_gourmet.data.Data.Companion.RADIUS_OF_EARTH_KM
 import org.json.JSONObject
 import org.json.JSONArray
 import java.io.IOException
 import java.io.InputStream
+import kotlin.math.roundToInt
 
 class Funciones {
     companion object {
@@ -59,6 +61,18 @@ class Funciones {
                 Log.e("Funciones", "Error leyendo el archivo destinos.json: ${ex.message}")
                 null
             }
+        }
+
+        fun distance(lat1: Double, long1: Double, lat2: Double, long2: Double): Double {
+            val latDistance = Math.toRadians(lat1 - lat2)
+            val lngDistance = Math.toRadians(long1 - long2)
+            val a = (Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                    + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                    * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2))
+            val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+            val result = RADIUS_OF_EARTH_KM * c
+            return (result * 100.0).roundToInt() / 100.0
+
         }
     }
 }
