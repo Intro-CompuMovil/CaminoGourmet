@@ -1,61 +1,45 @@
 package com.example.camino_gourmet.logic
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Sesion
+import java.util.concurrent.Executor
 
 class MiRestaurante : AppCompatActivity() {
-    lateinit var switchRestaurante : Switch
-    lateinit var nombreRestaurante : TextView
-    lateinit var calificacion : TextView
+
+    lateinit var switchRestaurante: Switch
+    lateinit var nombreRestaurante: TextView
+    lateinit var calificacion: TextView
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo: BiometricPrompt.PromptInfo
+    private lateinit var executor: Executor
+
+    private var isSwitchToggledManually = false // Flag to control switch toggling
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mi_restaurante)
-
         val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
-        
-        //Setear informacion del restaurante de acuerdo a la sesion
-        nombreRestaurante = findViewById<TextView>(R.id.nombreRestaurante)
-        nombreRestaurante.text = Sesion.restaurante.get("nombre").toString()
-        calificacion = findViewById<TextView>(R.id.calificacion)
-        calificacion.text = Sesion.restaurante.get("calificacion").toString()
 
-        switchRestaurante = findViewById<Switch>(R.id.switchRestaurante)
-        checkSwitch()
-        switchRestaurante.setOnClickListener{clickSwitch();checkSwitch()}
-
-
+        initializeUIElements()
+        setupBiometricPrompt()
+        setupSwitchListener()
     }
 
-    fun clickSwitch(){
-        var intentHuella = Intent(this, AutorizarHuella::class.java)
-        startActivity(intentHuella)
-    }
-
-    fun checkSwitch(){
-        var stateChecked = switchRestaurante.isChecked
-        if(stateChecked){
-            switchRestaurante.text = "Abierto"
-            switchRestaurante.setTextColor(resources.getColor(R.color.verde))
-        }else{
-            switchRestaurante.text = "Cerrado"
-            switchRestaurante.setTextColor(resources.getColor(R.color.rojo))
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
@@ -74,5 +58,88 @@ class MiRestaurante : AppCompatActivity() {
             R.id.Inicio -> startActivity(intentInicio)
         }
         return super.onOptionsItemSelected(item)
+    }
+
+
+    //Funcion para inicializar elementos de la interfaz
+    private fun initializeUIElements() {
+        nombreRestaurante = findViewById(R.id.nombreRestaurante)
+        nombreRestaurante.text = Sesion.restaurante.get("nombre").toString()
+
+        calificacion = findViewById(R.id.calificacion)
+        calificacion.text = Sesion.restaurante.get("calificacion").toString()
+
+        switchRestaurante = findViewById(R.id.switchRestaurante)
+        checkSwitch() //Inicializar estado del switch
+    }
+
+    //Funcion para inicializar/configurar prompt de huella
+    private fun setupBiometricPrompt() {
+        executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                onBiometricSuccess() //Manejar autenticacion exitosa
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                onBiometricError(errString) //Manejar error de autenticacion
+            }
+
+            override fun onAuthenticationFailed() {
+                super.onAuthenticationFailed()
+                onBiometricFailed() //Manejar autenticacion fallida
+            }
+        })
+
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Autenticacion Biométrica")
+            .setSubtitle("\nConfirma tu identidad para cambiar el estado del restaurante")
+            .setNegativeButtonText("Cancelar")
+            .build()
+    }
+
+    //Funcion para manejar el comportamiento del switch
+    private fun setupSwitchListener() {
+        switchRestaurante.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
+            if (isSwitchToggledManually) {
+                isSwitchToggledManually = false //Resetear bandera despues de toggle manual
+            } else {
+                switchRestaurante.isChecked = !isChecked //Revertir toggle
+                biometricPrompt.authenticate(promptInfo) //Mostrar prompt biometrico
+            }
+        }
+    }
+
+    //Actualizar label y color del switch segun su estado
+    private fun checkSwitch() {
+        val stateChecked = switchRestaurante.isChecked
+        if (stateChecked) {
+            switchRestaurante.text = "Abierto"
+            switchRestaurante.setTextColor(resources.getColor(R.color.verde))
+        } else {
+            switchRestaurante.text = "Cerrado"
+            switchRestaurante.setTextColor(resources.getColor(R.color.rojo))
+        }
+    }
+
+    //Manejar autenticacion sin exito
+    private fun onBiometricSuccess() {
+        runOnUiThread {
+            isSwitchToggledManually = true //Permitir toggle manual del switch
+            switchRestaurante.isChecked = !switchRestaurante.isChecked
+            checkSwitch() //Actualizar switch
+        }
+    }
+
+    //Manejar error de autenticacion
+    private fun onBiometricError(errString: CharSequence) {
+        Toast.makeText(this@MiRestaurante, "Error de autenticación: $errString", Toast.LENGTH_SHORT).show()
+    }
+
+    //Manejar autenticacion fallida
+    private fun onBiometricFailed() {
+        Toast.makeText(this@MiRestaurante, "Autenticación fallida", Toast.LENGTH_SHORT).show()
     }
 }

@@ -36,9 +36,6 @@
             android:name=".logic.PerfilRestaurante"
             android:exported="false"></activity>
         <activity
-            android:name=".logic.AutorizarHuella"
-            android:exported="false" />
-        <activity
             android:name=".logic.CalificarRestaurante"
             android:exported="false"
             android:windowSoftInputMode="adjustNothing" />
