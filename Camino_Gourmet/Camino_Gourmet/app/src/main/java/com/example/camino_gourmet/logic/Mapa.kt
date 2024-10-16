@@ -53,7 +53,9 @@ import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
+import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.compass.CompassOverlay
 import kotlin.math.roundToInt
 
 class Mapa: AppCompatActivity() {
@@ -62,7 +64,9 @@ class Mapa: AppCompatActivity() {
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var Restaurante: String
     private lateinit var boton: Button
+    private lateinit var Button: Button
     private lateinit var mapView: MapView
+    private lateinit var compassOverlay: Overlay
     private lateinit var mLocationRequest: LocationRequest
     private lateinit var mLocationCallback: LocationCallback
     lateinit var roadManager: RoadManager
@@ -97,9 +101,6 @@ class Mapa: AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         mapView = findViewById(R.id.osmMap)
-        mapView.setTileSource(TileSourceFactory.MAPNIK)
-        mapView.setBuiltInZoomControls(true)
-        mapView.setMultiTouchControls(true)
         roadManager = OSRMRoadManager(this, "ANDROID")
 
         val algo = Data.MY_PERMISSION_LOCATION_CODE
@@ -125,8 +126,8 @@ class Mapa: AppCompatActivity() {
         Restaurante = Sesion.restaurantMode
 
         Funciones.guardarRestaurantesjson(this, Restaurante)
-        val Button = findViewById<Button>(R.id.button)
-        boton = findViewById<Button>(R.id.botonCentrar)
+        Button = findViewById(R.id.button)
+        boton = findViewById(R.id.botonCentrar)
 
         statusTextView.text = "Buscando restaurantes de: $Restaurante en la zona"
         statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark))
@@ -145,13 +146,7 @@ class Mapa: AppCompatActivity() {
         }
         */
 
-        Button.setOnClickListener {
 
-            val intentParadas = Intent(this, Paradas::class.java).apply {
-                putExtra("TipoRestaurante", Restaurante)
-            }
-            startActivity(intentParadas)
-        }
 
         boton.setOnClickListener {
             //Ubicar el mapa en la ubicación del usuario
@@ -164,6 +159,17 @@ class Mapa: AppCompatActivity() {
 
         }
 
+    }
+
+    private fun botonHabilitado(){
+        Button.isEnabled = true
+        Button.setOnClickListener {
+
+            val intentParadas = Intent(this, Paradas::class.java).apply {
+                putExtra("TipoRestaurante", Restaurante)
+            }
+            startActivity(intentParadas)
+        }
     }
 
     private fun actualizarUbicacion(location: Location) {
@@ -247,11 +253,13 @@ class Mapa: AppCompatActivity() {
         }
     }
 
+
     private fun createLocationRequest(): LocationRequest =
         // New builder
         LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
             setMinUpdateIntervalMillis(5000)
         }.build()
+
 
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
@@ -326,6 +334,7 @@ class Mapa: AppCompatActivity() {
             mFusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
                 if (location != null) {
                     BuscarRestaurante(location)
+                    showPermissionStatus(true)
                 } else {
                     statusTextView.text = "No se pudo obtener la ubicación."
                     statusTextView.setTextColor(
@@ -350,6 +359,10 @@ class Mapa: AppCompatActivity() {
 
         userMarker?.remove(mapView)
 
+        mapView.setTileSource(TileSourceFactory.MAPNIK)
+        mapView.setBuiltInZoomControls(true)
+        mapView.setMultiTouchControls(true)
+
         //Ubicar el mapa en la ubicación del usuario
         mapView.controller.setZoom(15.0)
         mapView.controller.setCenter(userLocation)
@@ -361,6 +374,10 @@ class Mapa: AppCompatActivity() {
         userMarker?.title = "Tu ubicación"
         userMarker?.alpha = 1.0f
         mapView.overlays.add(userMarker)
+
+        compassOverlay = CompassOverlay(this, mapView)
+        (compassOverlay as CompassOverlay).enableCompass()
+        mapView.overlays.add(compassOverlay)
 
 
         for (restaurant in restaurantes) {
@@ -407,6 +424,7 @@ class Mapa: AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // El permiso fue concedido, usar ubicacion
                     setLocation()
+                    botonHabilitado()
                 } else {
                     // Mostrar estado de permiso denegado
                     showPermissionStatus(false)
@@ -422,17 +440,18 @@ class Mapa: AppCompatActivity() {
 
     private fun showPermissionRationale() {
         Toast.makeText(
-            this, "El permiso de ubicacion es necesario para acceder a tu longitud y latitud",
-            Toast.LENGTH_LONG
-        ).show()
+            this, "Servicios reducidos", Toast.LENGTH_LONG).show()
     }
 
     private fun showPermissionStatus(granted: Boolean) {
         if (!granted) {
             statusTextView.text = "PERMISO DENEGADO!"
+            boton.visibility = View.GONE
             statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
         } else {
-            statusTextView.text = ""  // Limpiar el mensaje cuando se cargan los contactos
+            statusTextView.text = "BIENVENIDO!!" // Limpiar el mensaje cuando se cargan los contactos
+            boton.visibility = View.VISIBLE
+            statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
         }
     }
 
