@@ -6,8 +6,8 @@ class Data {
         val MY_PERMISSION_LOCATION_CODE = 100
         val RESTAURANT_LIST =ArrayList<Restaurant>()
         var RESTAURANT_ROUTE = ArrayList<Restaurant>()
-        var latitude: Double? = null
-        var longitude: Double? = null
+        var latitud: Double? = null
+        var longitud: Double? = null
         val RADIUS_OF_EARTH_KM = 6371
     }
 }

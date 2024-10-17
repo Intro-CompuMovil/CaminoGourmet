@@ -30,9 +30,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Data
-import com.example.camino_gourmet.data.Data.Companion.RADIUS_OF_EARTH_KM
-import com.example.camino_gourmet.data.Data.Companion.latitude
-import com.example.camino_gourmet.data.Data.Companion.longitude
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Restaurant
 import com.example.camino_gourmet.data.Sesion
@@ -121,7 +118,6 @@ class Mapa: AppCompatActivity() {
         }
 
 
-
         // Recibir el tipo de restaurante seleccionado
         Restaurante = Sesion.restaurantMode
 
@@ -151,7 +147,7 @@ class Mapa: AppCompatActivity() {
         boton.setOnClickListener {
             //Ubicar el mapa en la ubicación del usuario
             mapView.controller.setZoom(15.0)
-            mapView.controller.setCenter(latitude?.let { it1 -> longitude?.let { it2 ->
+            mapView.controller.setCenter(Data.latitud?.let { it1 -> Data.longitud?.let { it2 ->
                 GeoPoint(it1,
                     it2
                 )
@@ -174,8 +170,10 @@ class Mapa: AppCompatActivity() {
 
     private fun actualizarUbicacion(location: Location) {
         val userLocation = GeoPoint(location.latitude, location.longitude)
-        latitude = location.latitude
-        longitude = location.longitude
+        Data.latitud = location.latitude
+        Data.longitud = location.longitude
+
+
         val waypoints = ArrayList<GeoPoint>()
         mapView.overlays.remove(roadOverlay) // Elimina el overlay de la ruta
         mapView.invalidate() // Refresca el mapa
@@ -357,6 +355,8 @@ class Mapa: AppCompatActivity() {
         val userLocation = GeoPoint(location.latitude, location.longitude)
         val restaurantes = Data.RESTAURANT_LIST
 
+        botonHabilitado()
+
         userMarker?.remove(mapView)
 
         mapView.setTileSource(TileSourceFactory.MAPNIK)
@@ -424,7 +424,6 @@ class Mapa: AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // El permiso fue concedido, usar ubicacion
                     setLocation()
-                    botonHabilitado()
                 } else {
                     // Mostrar estado de permiso denegado
                     showPermissionStatus(false)

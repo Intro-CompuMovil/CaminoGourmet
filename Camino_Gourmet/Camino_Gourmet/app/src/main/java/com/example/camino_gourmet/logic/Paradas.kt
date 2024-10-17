@@ -3,6 +3,8 @@ package com.example.camino_gourmet.logic
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -22,6 +24,7 @@ import com.example.camino_gourmet.data.Sesion
 import com.example.camino_gourmet.data.Restaurant
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import java.util.Locale
 
 class Paradas: AppCompatActivity() {
 
@@ -42,9 +45,6 @@ class Paradas: AppCompatActivity() {
         val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
-        val latitude = Data.latitude
-        val longitude = Data.longitude
-        val algo = Data.MY_PERMISSION_LOCATION_CODE
         seleccion = findViewById(R.id.botonCrearRuta)
         listView = findViewById<ListView>(R.id.lista)
         statusTextView = findViewById(R.id.Ubicacion)
@@ -54,7 +54,7 @@ class Paradas: AppCompatActivity() {
         Funciones.guardarRestaurantesjson(this, Restaurante)
 
         val sortedRestaurants = Data.RESTAURANT_LIST.sortedBy { restaurant ->
-            Data.latitude?.let { Data.longitude?.let { it1 ->
+            Data.latitud?.let { Data.longitud?.let { it1 ->
                 Funciones.distance(it,
                     it1, restaurant.latitud, restaurant.longitud)
             } }
@@ -63,8 +63,10 @@ class Paradas: AppCompatActivity() {
         val adapter =  RestaurantsAdapter(this,sortedRestaurants)
         listView.adapter = adapter
 
+        var ubicacion = Data.longitud?.let { Data.latitud?.let { it1 -> getLocationText(it1, it) } }
 
-        statusTextView.text = "Ubicado en latitud $latitude y longitud $longitude"
+
+        statusTextView.text = "Ubicado en latitud $ubicacion"
         /*
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -102,6 +104,27 @@ class Paradas: AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+
+    private fun getLocationText(latitude: Double, longitude: Double): String {
+        var locationText = "No se pudo obtener la ubicación"  // Texto por defecto
+
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                locationText = address.getAddressLine(0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return locationText
+    }
+
+
 
 
 }
