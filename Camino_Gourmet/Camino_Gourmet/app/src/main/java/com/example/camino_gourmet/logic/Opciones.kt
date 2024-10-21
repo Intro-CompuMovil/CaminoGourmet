@@ -63,8 +63,4 @@ class Opciones: AppCompatActivity() {
         Data.RESTAURANT_ROUTE = ArrayList<Restaurant>()
     }
 
-
-
-
-
 }

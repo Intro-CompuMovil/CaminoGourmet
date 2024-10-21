@@ -34,20 +34,23 @@
 
         <activity
             android:name=".logic.PerfilRestaurante"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".logic.CalificarRestaurante"
             android:exported="false"
             android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".logic.MiRestaurante"
-            android:exported="false"></activity>
+            android:exported="false" />
+        <activity
+            android:name=".logic.MapaRestaurante"
+            android:exported="false" />
         <activity
             android:name=".logic.Perfil"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".logic.EditarCuenta"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".logic.CambiarContrasena"
             android:exported="false" />

@@ -6,7 +6,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -66,7 +68,7 @@ class Mapa: AppCompatActivity() {
     private lateinit var compassOverlay: Overlay
     private lateinit var mLocationRequest: LocationRequest
     private lateinit var mLocationCallback: LocationCallback
-    lateinit var roadManager: RoadManager
+    private lateinit var roadManager: RoadManager
     private var roadOverlay: Polyline? = null
     private var userMarker: Marker? = null //Variable para almaenar marcador actual
     private var listaMarkerRest = mutableListOf<Marker>() //Almacenar los marcadores de restaurantes
@@ -155,6 +157,7 @@ class Mapa: AppCompatActivity() {
 
         }
 
+
     }
 
     private fun botonHabilitado(){
@@ -171,6 +174,7 @@ class Mapa: AppCompatActivity() {
     private fun actualizarUbicacion(location: Location) {
         val userLocation = GeoPoint(location.latitude, location.longitude)
         Data.latitud = location.latitude
+
         Data.longitud = location.longitude
 
 
@@ -188,6 +192,7 @@ class Mapa: AppCompatActivity() {
         // Añadir un marcador en la ubicación del usuario
         userMarker = Marker(mapView)
         userMarker?.position = userLocation
+        userMarker?.icon = crearMarcador(Color.RED)
         userMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         userMarker?.title = "Tu ubicación"
         userMarker?.alpha = 1.0f
@@ -244,7 +249,7 @@ class Mapa: AppCompatActivity() {
         val builder = LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(this)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-        task.addOnSuccessListener { locationSettingsResponse ->
+        task.addOnSuccessListener {
             Log.i("LOCATION", "GPS is ON")
             var settingsOK = true
             startLocationUpdates()
@@ -331,7 +336,7 @@ class Mapa: AppCompatActivity() {
 
             mFusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
                 if (location != null) {
-                    BuscarRestaurante(location)
+                    buscarRestaurante(location)
                     showPermissionStatus(true)
                 } else {
                     statusTextView.text = "No se pudo obtener la ubicación."
@@ -350,7 +355,7 @@ class Mapa: AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun BuscarRestaurante(location: Location) {
+    private fun buscarRestaurante(location: Location) {
 
         val userLocation = GeoPoint(location.latitude, location.longitude)
         val restaurantes = Data.RESTAURANT_LIST
@@ -370,6 +375,7 @@ class Mapa: AppCompatActivity() {
         // Añadir un marcador en la ubicación del usuario
         userMarker = Marker(mapView)
         userMarker?.position = userLocation
+        userMarker?.icon = crearMarcador(Color.RED)
         userMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         userMarker?.title = "Tu ubicación"
         userMarker?.alpha = 1.0f
@@ -403,7 +409,16 @@ class Mapa: AppCompatActivity() {
         mapView.invalidate()
     }
 
-    fun getRestaurantsByProximity(location: Location, restaurantes: ArrayList<Restaurant>): List<Restaurant> {
+    private fun crearMarcador(color: Int): GradientDrawable {
+        val drawable = GradientDrawable()
+        drawable.shape = GradientDrawable.OVAL
+        drawable.setColor(color)
+        drawable.setSize(30, 30)  // Tamaño del ícono
+        return drawable
+    }
+
+
+    private fun getRestaurantsByProximity(location: Location, restaurantes: ArrayList<Restaurant>): List<Restaurant> {
         var userLat = location.latitude
         var userLong = location.longitude
         return restaurantes.sortedBy { restaurant ->
