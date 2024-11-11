@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
@@ -20,6 +21,8 @@ import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Restaurante
 import com.example.camino_gourmet.data.Sesion
 import com.example.camino_gourmet.data.Usuario
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import java.util.Locale
 import kotlin.random.Random
 
@@ -36,6 +39,7 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
     private lateinit var spinnerCategoria : Spinner
     private lateinit var ubicacion : EditText
     private lateinit var botonMapa: Button
+    val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,22 +103,16 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
 
             //Crear nuevo usuario con los valores introducidos
             var nuevoUsuario = nuevoRestaurante?.let {
-                Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText,
-                    it
-                )
+                Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText, it, contrasenaText)
             }
 
-            //Crear nuevo objeto de usuario
-            var nuevoObjeto = nuevoUsuario?.let { Funciones.createNewUser(it) }
-
-            //Agregar usuario al json en internal storage
-            if (nuevoObjeto != null) {
-                Funciones.addNewUserToUsuarios(this,nuevoObjeto)
+            if (nuevoUsuario != null) {
+                createAccount(nuevoUsuario)
+            }else{
+                Toast.makeText(this,"Error al crear la cuenta", Toast.LENGTH_SHORT).show()
             }
-            Toast.makeText(this,"Cuenta existosamente creada", Toast.LENGTH_SHORT).show()
 
-            val intent = Intent(this, InicioSesion::class.java)
-            startActivity(intent)
+
 
         }else
             Toast.makeText(this,"Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
@@ -137,5 +135,71 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
         }
 
         return locationText
+    }
+
+    fun createAccount(usuario: Usuario){
+        Sesion.auth.createUserWithEmailAndPassword(usuario.email, usuario.contrasena)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("AUTH-SIGNUP", "createUserWithEmail:success")
+                    val user = Sesion.auth.currentUser
+                    storeUser(usuario)
+                    val intent = Intent(this, InicioSesion::class.java)
+                    startActivity(intent)
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("AUTH-SIGNUP", "createUserWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        baseContext,
+                        "Authentication failed.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+    }
+
+    fun storeUser(usuario: Usuario) {
+        val restaurante = hashMapOf(
+            "calificacion" to usuario.restaurante.calificacion,
+            "categoria" to usuario.restaurante.categoria,
+            "latitud" to usuario.restaurante.latitud,
+            "longitud" to usuario.restaurante.longitud,
+            "nombre" to usuario.restaurante.nombre
+        )
+        Log.d("CREATE-USER", "Llegue hasta aca")
+        Log.d("CREATE-USER", "Restaurante: $restaurante")
+
+        db.collection("restaurantes")
+            .add(restaurante)
+            .addOnSuccessListener { documentReference ->
+                val restauranteId = documentReference.id
+                Log.d("CREATE-USER", "DocumentSnapshot added with ID: $restauranteId")
+
+                // Now create the "usuarios" document with the correct restauranteId
+                val usuarioData = hashMapOf(
+                    "apellido" to usuario.apellido,
+                    "email" to usuario.email,
+                    "nombre" to usuario.nombre,
+                    "restaurante" to "restaurantes/$restauranteId",
+                    "userName" to usuario.userName
+                )
+
+                db.collection("usuarios").add(usuarioData)
+                    .addOnSuccessListener { userDocumentReference ->
+                        Log.d("CREATE-USER", "Usuario document added with ID: ${userDocumentReference.id}")
+                        Toast.makeText(this,"Cuenta existosamente creada", Toast.LENGTH_SHORT).show()
+
+                        val intent = Intent(this, InicioSesion::class.java)
+                        startActivity(intent)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("CREATE-USER", "Error adding usuario document", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.w("CREATE-USER", "Error adding restaurante document", e)
+            }
     }
 }

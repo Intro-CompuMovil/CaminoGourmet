@@ -12,11 +12,13 @@ import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Usuario
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Sesion
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class InicioSesion : AppCompatActivity() {
 
     lateinit var contrasena : EditText
-    lateinit var nombre : EditText
+    lateinit var email : EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +30,7 @@ class InicioSesion : AppCompatActivity() {
 
 
         contrasena = findViewById<EditText>(R.id.Contraseña)
-        nombre = findViewById<EditText>(R.id.Usuario)
+        email = findViewById<EditText>(R.id.Usuario)
         val TextView = findViewById<TextView>(R.id.CrearCuenta)
         val BotonIniciarSesion = findViewById<Button>(R.id.BotonIngreso)
 
@@ -45,69 +47,98 @@ class InicioSesion : AppCompatActivity() {
     }
 
     fun botonIniciarSesion(){
-        val nombre = nombre.text.toString()
+        val email = email.text.toString()
         val contrasena = contrasena.text.toString()
 
-        if (nombre.isNotEmpty() && contrasena.isNotEmpty()) {
-            validarUsuario()
+        if (email.isNotEmpty() && contrasena.isNotEmpty()) {
+            validarUsuario(email, contrasena)
         } else{
             Toast.makeText(this, "Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
         }
 
     }
 
-    fun validarUsuario(){
-        //Obtener usuario desde el json a partir de su username
-        var usuario = Funciones.getUserByUsername(this,nombre.text.toString())
-        if (usuario != null) {
-            //Usuario encontrado
-            println("User found: ${usuario.nombre} ${usuario.restaurante}")
-            Toast.makeText(this, "¡Bienvenido de vuelta!", Toast.LENGTH_SHORT).show()
+    fun validarUsuario(email: String, contrasena: String){
+        Sesion.auth.signInWithEmailAndPassword(email, contrasena)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("AUTH-LOGIN", "signInWithEmail:success")
+                    val user = Sesion.auth.currentUser
+                    Toast.makeText(this, "¡Bienvenido de vuelta!", Toast.LENGTH_SHORT).show()
+                    setSesion(email)
 
-            //Setear sesion
-            setSesion(usuario)
-
-            //Ingresar
-            val intent = Intent(this, Opciones::class.java)
-            startActivity(intent)
-        } else {
-            Toast.makeText(this, "Usuario no encontrado. Verifica tus credenciales", Toast.LENGTH_SHORT).show()
-        }
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("AUTH-LOGIN", "signInWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        baseContext,
+                        "Usuario no encontrado, verifica tus credenciales.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
     }
 
-    fun setSesion(usuario: Usuario){
-        Sesion.userName = usuario.userName
-        Sesion.nombre = usuario.nombre
-        Sesion.apellido = usuario.apellido
-        Sesion.email = usuario.email
-        if(usuario.restaurante.nombre != ""){
-            Sesion.esRestaurante = true
-            if (usuario.restaurante.nombre.isNotEmpty()) {
-                Sesion.esRestaurante = true
-                Sesion.restaurante = mapOf(
-                    "nombre" to usuario.restaurante.nombre,
-                    "categoria" to usuario.restaurante.categoria,
-                    "calificacion" to usuario.restaurante.calificacion,
-                    "longitud" to usuario.restaurante.longitud,
-                    "latitud" to usuario.restaurante.latitud
-                )
+    fun setSesion(email: String){
+
+        val db = FirebaseFirestore.getInstance()
+        val collectionRef = db.collection("usuarios")
+        collectionRef
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                // Check if any documents were found
+                if (!querySnapshot.isEmpty) {
+                    for (document in querySnapshot.documents) {
+                        // Convert the document to your data class
+                        val doc = document.data
+                        Log.i("GET-USER","Found document: $doc")
+                        Sesion.userName = doc?.get("userName") as? String ?: ""
+                        Sesion.nombre = doc?.get("nombre") as? String ?: ""
+                        Sesion.apellido = doc?.get("apellido") as? String ?: ""
+                        Sesion.email = doc?.get("email") as? String ?: ""
+                        val restaurantePath = doc?.get("restaurante") as? String
+                        if (restaurantePath != null) {
+                            val restauranteRef = db.document(restaurantePath)
+                            restauranteRef.get()
+                                .addOnSuccessListener { restauranteDocument ->
+                                    if (restauranteDocument.exists()) {
+                                        val restauranteData = restauranteDocument.data
+                                        // Access specific fields if needed, for example:
+                                        val nombre = restauranteData?.get("nombre") as? String
+                                        if (nombre != null && nombre.isNotEmpty())  {
+                                            Sesion.esRestaurante=true
+                                            Log.i("GET-RESTAURANTE","Nombre del restaurante: $nombre")
+                                            Sesion.restaurante["nombre"] = nombre
+                                            Sesion.restaurante["categoria"] = restauranteData["categoria"] as? String ?: ""
+                                            Sesion.restaurante["calificacion"] = restauranteData["calificacion"] as? Double ?: 0.0
+                                            Sesion.restaurante["longitud"] = restauranteData["longitud"] as? Double ?: 0.0
+                                            Sesion.restaurante["latitud"] = restauranteData["latitud"] as? Double ?: 0.0
+                                            Log.i("GET-RESTAURANTE", Sesion.restaurante.toString())
+                                        }
+                                        val intent = Intent(this, Opciones::class.java)
+                                        startActivity(intent)
+
+                                    } else {
+                                        Log.w("GET-RESTAURANTE", "No such document!")
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w("GET-RESTAURANTE", "Error getting document", e)
+                                }
+                        }
+
+
+
+                    }
+                } else {
+                    Log.i("GET-USER","No document found with the specified title.")
+                }
             }
-        }else if(usuario.restaurante.nombre == ""){
-            Sesion.esRestaurante = false
-            Sesion.restaurante = mapOf(
-                "nombre" to "",
-                "categoria" to "",
-                "calificacion" to 0.0,
-                "longitud" to 0.0,
-                "latitud" to 0.0
-            )
-        }
-        // Imprimir sesion con un log
-        Log.d("Sesion", "userName: ${Sesion.userName}")
-        Log.d("Sesion", "nombre: ${Sesion.nombre}")
-        Log.d("Sesion", "apellido: ${Sesion.apellido}")
-        Log.d("Sesion", "email: ${Sesion.email}")
-        Log.d("Sesion", "esRestaurante: ${Sesion.esRestaurante}")
-        Log.d("Sesion", "restaurante: ${Sesion.restaurante}")
+            .addOnFailureListener { exception ->
+                println("Error getting documents: $exception")
+                Toast.makeText(this, "Error al obtener los datos", Toast.LENGTH_SHORT).show()
+            }
     }
 }

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Sesion
 
 class Perfil : AppCompatActivity() {
@@ -43,7 +44,9 @@ class Perfil : AppCompatActivity() {
     }
 
     fun clickCerrarSesion(){
+        Funciones.clearSesion()
         var intentCerrarSesion = Intent(this, InicioSesion::class.java)
+        intentCerrarSesion.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intentCerrarSesion)
     }
 }

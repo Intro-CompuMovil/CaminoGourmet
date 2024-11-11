@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -53,4 +54,7 @@ dependencies {
     /*implementation(libs.androidx.appcompat.v131)*/
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.github.MKergall:osmbonuspack:6.9.0")
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 }

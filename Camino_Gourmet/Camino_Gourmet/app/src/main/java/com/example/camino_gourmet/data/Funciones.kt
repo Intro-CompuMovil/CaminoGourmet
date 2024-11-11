@@ -318,6 +318,16 @@ class Funciones {
             return (result * 100.0).roundToInt() / 100.0
 
         }
+
+        fun clearSesion(){
+            Sesion.auth.signOut()
+            Sesion.userName = ""
+            Sesion.nombre = ""
+            Sesion.apellido = ""
+            Sesion.email = ""
+            Sesion.esRestaurante = false
+            Sesion.restaurante.clear()
+        }
     }
 }
 

@@ -3,6 +3,7 @@ package com.example.camino_gourmet.logic
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -13,7 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Restaurante
+import com.example.camino_gourmet.data.Sesion
 import com.example.camino_gourmet.data.Usuario
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 import kotlin.random.Random
 
 class
@@ -26,6 +32,7 @@ CreacionCuenta: AppCompatActivity() {
     lateinit var correo : EditText
     lateinit var usuario : EditText
     lateinit var contrasena : EditText
+    val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,19 +79,73 @@ CreacionCuenta: AppCompatActivity() {
             var nuevoRestaurante = Restaurante("","",0.0,0.0,0.0)
 
             //Crear nuevo usuario con los valores introducidos
-            var nuevoUsuario = Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText,nuevoRestaurante)
+            var nuevoUsuario = Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText,nuevoRestaurante, contrasenaText)
 
-            //Crear nuevo objeto de usuario
-            var nuevoObjeto = Funciones.createNewUser(nuevoUsuario)
+            createAccount(nuevoUsuario)
 
-            //Agregar usuario al json en internal storage
-            Funciones.addNewUserToUsuarios(this,nuevoObjeto)
-
-            val intent = Intent(this, InicioSesion::class.java)
-            startActivity(intent)
         }
         else
             Toast.makeText(this,"Ingrese los campos para continuar", Toast.LENGTH_SHORT).show()
+    }
+
+    fun createAccount(usuario: Usuario){
+        Sesion.auth.createUserWithEmailAndPassword(usuario.email, usuario.contrasena)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("AUTH-SIGNUP", "createUserWithEmail:success")
+                    val user = Sesion.auth.currentUser
+                    storeUser(usuario)
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("AUTH-SIGNUP", "createUserWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        baseContext,
+                        "Authentication failed.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+    }
+
+    fun storeUser(usuario: Usuario) {
+        val restaurante = hashMapOf(
+            "calificacion" to usuario.restaurante.calificacion,
+            "categoria" to usuario.restaurante.categoria,
+            "latitud" to usuario.restaurante.latitud,
+            "longitud" to usuario.restaurante.longitud,
+            "nombre" to usuario.restaurante.nombre
+        )
+
+        db.collection("restaurantes")
+            .add(restaurante)
+            .addOnSuccessListener { documentReference ->
+                val restauranteId = documentReference.id
+                Log.d("CREATE-USER", "DocumentSnapshot added with ID: $restauranteId")
+
+                // Now create the "usuarios" document with the correct restauranteId
+                val usuarioData = hashMapOf(
+                    "apellido" to usuario.apellido,
+                    "email" to usuario.email,
+                    "nombre" to usuario.nombre,
+                    "restaurante" to "restaurantes/$restauranteId",
+                    "userName" to usuario.userName
+                )
+
+                db.collection("usuarios").add(usuarioData)
+                    .addOnSuccessListener { userDocumentReference ->
+                        Log.d("CREATE-USER", "Usuario document added with ID: ${userDocumentReference.id}")
+                        val intent = Intent(this, InicioSesion::class.java)
+                        startActivity(intent)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("CREATE-USER", "Error adding usuario document", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.w("CREATE-USER", "Error adding restaurante document", e)
+            }
     }
 }
 
