@@ -6,6 +6,7 @@ import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -51,7 +52,7 @@ class Paradas: AppCompatActivity() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         Restaurante = intent.getStringExtra("TipoRestaurante") ?: ""
-        Funciones.guardarRestaurantesjson(this, Restaurante)
+        Funciones.guardarRestaurantes(this, Restaurante)
 
         val sortedRestaurants = Data.RESTAURANT_LIST.sortedBy { restaurant ->
             Data.latitud?.let { Data.longitud?.let { it1 ->

@@ -1,7 +1,7 @@
 package com.example.camino_gourmet.data
 
 data class Restaurant(
-    val id: Int,
+    val id: String,
     val nombre: String,
     val categoria: String,
     val calificacion: Double,

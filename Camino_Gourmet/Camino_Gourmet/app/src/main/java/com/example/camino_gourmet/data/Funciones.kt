@@ -4,6 +4,8 @@ package com.example.camino_gourmet.data
 import android.content.Context
 import android.util.Log
 import com.example.camino_gourmet.data.Data.Companion.RADIUS_OF_EARTH_KM
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import org.json.JSONObject
 import org.json.JSONArray
 import java.io.IOException
@@ -15,41 +17,36 @@ import java.io.FileOutputStream
 
 class Funciones {
     companion object {
-        fun guardarRestaurantesjson(context: Context, categoriaSeleccionada: String) {
-            val jsonString = loadJSONFromAsset(context)
+        fun guardarRestaurantes(context: Context, categoriaSeleccionada: String) {
 
-            if (jsonString != null) {
-                try {
-                    val json = JSONObject(jsonString)
-                    val restuarantesJson = json.getJSONArray("restaurantes")
-
-                    // Limpia la lista antes de llenarla, por si ya tiene datos
-                    Data.RESTAURANT_LIST.clear()
-
-                    for (i in 0 until restuarantesJson.length()) {
-                        val jsonObject = restuarantesJson.getJSONObject(i)
-                        val restaurante = Restaurant(
-                            id = jsonObject.getInt("id"),
-                            nombre = jsonObject.getString("nombre"),
-                            categoria = jsonObject.getString("categoria"),
-                            calificacion = jsonObject.getDouble("calificacion"),
-                            longitud = jsonObject.getDouble("longitud"),
-                            latitud = jsonObject.getDouble("latitud")
-                        )
-
-                        //Filtrar por Categoria
-                        if (restaurante.categoria.equals(categoriaSeleccionada, ignoreCase = true)) {
+            val db = Firebase.firestore
+            val collectionRef = db.collection("restaurantes")
+            val query = collectionRef
+                .whereEqualTo("categoria", categoriaSeleccionada)
+            query.get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        Log.i("FirestoreQuery", "No matching documents found.")
+                    } else {
+                        // Loop through documents and access their data
+                        Data.RESTAURANT_LIST.clear()
+                        for (document in documents) {
+                            val doc = document.data
+                            val id = document.id
+                            val calificacion = doc?.get("calificacion") as? Double ?: 0.0
+                            val categoria = doc?.get("categoria") as? String ?: ""
+                            val latitud = doc?.get("latitud") as? Double ?: 0.0
+                            val longitud = doc?.get("longitud") as? Double ?: 0.0
+                            val nombre = doc?.get("nombre") as? String ?: ""
+                            val restaurante = Restaurant(id, nombre, categoria, calificacion, longitud, latitud)
                             Data.RESTAURANT_LIST.add(restaurante)
+                            Log.i("FirestoreQuery", "Found document: $doc")
                         }
                     }
-                    Log.d("Funciones", "Destinos cargados exitosamente: ${Data.RESTAURANT_LIST.size}")
-                } catch (e: Exception) {
-                    Log.e("Funciones", "Error procesando el JSON: ${e.message}")
                 }
-            } else {
-                // Manejar el caso cuando el JSON no se puede cargar
-                Log.e("Funciones", "No se pudo cargar el archivo destinos.json")
-            }
+                .addOnFailureListener { exception ->
+                    Log.e("FirestoreQuery", "Error getting documents: $exception")
+                }
         }
 
         fun loadJSONFromAsset(context: Context): String? {

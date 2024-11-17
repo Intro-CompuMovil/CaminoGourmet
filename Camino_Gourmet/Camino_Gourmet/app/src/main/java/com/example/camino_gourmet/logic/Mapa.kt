@@ -123,7 +123,7 @@ class Mapa: AppCompatActivity() {
         // Recibir el tipo de restaurante seleccionado
         Restaurante = Sesion.restaurantMode
 
-        Funciones.guardarRestaurantesjson(this, Restaurante)
+        Funciones.guardarRestaurantes(this, Restaurante)
         Button = findViewById(R.id.button)
         boton = findViewById(R.id.botonCentrar)
 
