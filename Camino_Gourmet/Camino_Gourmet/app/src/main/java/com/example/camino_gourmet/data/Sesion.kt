@@ -6,6 +6,7 @@ import com.google.firebase.firestore.firestore
 
 class Sesion {
     companion object {
+        var userId = ""
         var restaurantMode = ""
         var userName = ""
         var nombre = ""
@@ -13,6 +14,7 @@ class Sesion {
         var email = ""
         var esRestaurante = false
         var restaurante: MutableMap<String, Any> = mutableMapOf(
+            "restaurantId" to "",
             "nombre" to "",
             "categoria" to "",
             "calificacion" to 0.0,

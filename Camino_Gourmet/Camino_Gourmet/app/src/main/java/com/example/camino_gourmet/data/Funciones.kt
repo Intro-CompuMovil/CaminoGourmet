@@ -321,6 +321,7 @@ class Funciones {
 
         fun clearSesion(){
             Sesion.auth.signOut()
+            Sesion.userId = ""
             Sesion.userName = ""
             Sesion.nombre = ""
             Sesion.apellido = ""

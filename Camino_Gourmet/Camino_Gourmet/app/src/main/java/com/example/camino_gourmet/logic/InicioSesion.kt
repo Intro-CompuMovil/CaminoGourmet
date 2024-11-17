@@ -92,6 +92,7 @@ class InicioSesion : AppCompatActivity() {
                 if (!querySnapshot.isEmpty) {
                     for (document in querySnapshot.documents) {
                         // Convert the document to your data class
+                        Sesion.userId = document.id as? String ?: ""
                         val doc = document.data
                         Log.i("GET-USER","Found document: $doc")
                         Sesion.userName = doc?.get("userName") as? String ?: ""
@@ -108,6 +109,7 @@ class InicioSesion : AppCompatActivity() {
                                         // Access specific fields if needed, for example:
                                         val nombre = restauranteData?.get("nombre") as? String
                                         if (nombre != null && nombre.isNotEmpty())  {
+                                            Sesion.restaurante["restaurantId"] = restauranteDocument.id
                                             Sesion.esRestaurante=true
                                             Log.i("GET-RESTAURANTE","Nombre del restaurante: $nombre")
                                             Sesion.restaurante["nombre"] = nombre
@@ -116,6 +118,10 @@ class InicioSesion : AppCompatActivity() {
                                             Sesion.restaurante["longitud"] = restauranteData["longitud"] as? Double ?: 0.0
                                             Sesion.restaurante["latitud"] = restauranteData["latitud"] as? Double ?: 0.0
                                             Log.i("GET-RESTAURANTE", Sesion.restaurante.toString())
+                                            Log.i("GET-SESION", Sesion.userId)
+                                            Log.i("GET-SESION",
+                                                Sesion.restaurante["restaurantId"].toString()
+                                            )
                                         }
                                         val intent = Intent(this, Opciones::class.java)
                                         startActivity(intent)
