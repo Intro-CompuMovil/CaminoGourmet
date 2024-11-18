@@ -16,6 +16,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,9 +24,12 @@ import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Comentario
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Sesion
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStreamReader
+import java.text.SimpleDateFormat
 
 class PerfilRestaurante : AppCompatActivity() {
     private lateinit var comentariosView: RecyclerView
@@ -33,6 +37,8 @@ class PerfilRestaurante : AppCompatActivity() {
     lateinit var botonCalificarRestaurante: Button
     lateinit var restaurantName: String
     var calificacion = 0.0
+    lateinit var restaurantId: String
+    lateinit var calificacionRestaurante: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,11 +47,14 @@ class PerfilRestaurante : AppCompatActivity() {
         val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
+        restaurantId = intent.getStringExtra("restaurantId").toString()
+        restaurantName = intent.getStringExtra("restaurantName").toString()
         restaurantName = intent.getStringExtra("restaurantName").toString()
         calificacion = intent.getDoubleExtra("puntaje",0.0)
+        Log.i("DesdePerfilRestaurante", "restaurantId: $restaurantId")
 
         val textoNombreRestaurante = findViewById<TextView>(R.id.textoNombreRestaurante)
-        val calificacionRestaurante = findViewById<TextView>(R.id.Calificacion)
+        calificacionRestaurante = findViewById<TextView>(R.id.Calificacion)
 
         textoNombreRestaurante.text = restaurantName
         calificacionRestaurante.text = calificacion.toString()
@@ -72,29 +81,65 @@ class PerfilRestaurante : AppCompatActivity() {
         Log.d("DesdePerfilRestaurante", "calificacion: $calificacion")
         bundle.putString("restaurantName",restaurantName)
         bundle.putDouble("puntaje",calificacion)
+        bundle.putString("restaurantId",restaurantId)
         var intentCalificar = Intent(this, CalificarRestaurante::class.java)
         intentCalificar.putExtras(bundle)
         startActivity(intentCalificar)
     }
 
-    private fun loadComentarios(context: Context) {
-        val gson = Gson()
-        try {
-            // Cargar el archivo JSON desde el almacenamiento interno
-            val jsonString = Funciones.loadCommentsJSONFromInternalStorage(context)
+    override fun onResume() {
+        super.onResume()
+        loadComentarios(this)
+    }
 
-            if (jsonString != null) {
-                // Parsear el JSON usando Gson
-                val comentarioResponse = gson.fromJson(jsonString, ComentarioResponse::class.java)
-                // Configurar el adaptador con los comentarios cargados
-                adapter = ComentariosAdapter(comentarioResponse.comentarios)
-                comentariosView.adapter = adapter
-            } else {
-                Log.e("loadComentarios", "No se pudo cargar el archivo comentarios.json desde el almacenamiento interno.")
+    private fun loadComentarios(context: Context) {
+        val db = Firebase.firestore
+        var comentarios : MutableList<Comentario> = mutableListOf()
+        val restauranteRef = db.collection("restaurantes").document(restaurantId)
+        val comentariosRef = db.collection("restaurantes").document(restaurantId).collection("comentarios")
+        comentariosRef.get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.isEmpty) {
+                    // No comments found, handle this case (e.g., display a "No comments yet" message)
+                    Log.d("GET-COMMENTS", "No comments yet for this restaurant")
+
+                } else {
+                    // Process the comments
+                    var calificacionParaPromedio:Double = 0.0
+                    for (document in snapshot.documents) {
+                        val data = document.data ?: continue
+                        calificacionParaPromedio += data["calificacion"] as? Double ?: 0.0
+                        val nombreCompleto = data["nombre_completo"] as? String ?: ""
+                        val calificacion = data["calificacion"].toString() as? String ?: ""
+                        val fecha = data["fecha"] as? String ?: ""
+                        val descripcion = data["descripcion"] as? String ?: ""
+                        val imageUrl = data["imageUrl"] as? String ?: ""
+                        val objetoComentario = Comentario(nombreCompleto, calificacion, fecha, descripcion, imageUrl)
+                        comentarios.add(objetoComentario)
+                    }
+                    val dateFormat = SimpleDateFormat("dd-MM-yy HH:mm:ss")
+                    val sortedComentarios = comentarios.sortedByDescending { comentario ->
+                        dateFormat.parse(comentario.fecha)
+                    }
+                    val promedioCalificacionNumber = String.format("%.1f", calificacionParaPromedio / sortedComentarios.size).toDouble()
+                    val promedioCalificacionText = String.format("%.1f", calificacionParaPromedio / sortedComentarios.size)
+                    calificacionRestaurante.text = promedioCalificacionText
+                    adapter = ComentariosAdapter(this, sortedComentarios)
+                    comentariosView.adapter = adapter
+                    restauranteRef.update("calificacion", promedioCalificacionNumber)
+                        .addOnSuccessListener {
+                            Log.d("Firestore", "Campo actualizado con éxito")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Firestore", "Error al actualizar el campo", e)
+                        }
+
+                }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            .addOnFailureListener { exception ->
+                Toast.makeText(this, "Error retrieving comments", Toast.LENGTH_SHORT).show()
+
+            }
     }
 
     private data class ComentarioResponse(

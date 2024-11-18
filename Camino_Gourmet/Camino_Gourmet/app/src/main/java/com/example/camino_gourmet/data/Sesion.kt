@@ -3,6 +3,7 @@ package com.example.camino_gourmet.data
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 
 class Sesion {
     companion object {
@@ -22,5 +23,6 @@ class Sesion {
             "latitud" to 0.0
         )
         var auth = Firebase.auth
+        var imagesRef = Firebase.storage.reference.child("images")
     }
 }

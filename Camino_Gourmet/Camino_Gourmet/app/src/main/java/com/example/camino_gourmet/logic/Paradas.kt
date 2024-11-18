@@ -66,24 +66,13 @@ class Paradas: AppCompatActivity() {
 
         var ubicacion = Data.longitud?.let { Data.latitud?.let { it1 -> getLocationText(it1, it) } }
 
-
         statusTextView.text = "Ubicado en latitud $ubicacion"
-        /*
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        */
+
         seleccion.setOnClickListener {
             val intent = Intent(this, Mapa::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             startActivity(intent)
-
         }
-
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -124,8 +113,4 @@ class Paradas: AppCompatActivity() {
 
         return locationText
     }
-
-
-
-
 }

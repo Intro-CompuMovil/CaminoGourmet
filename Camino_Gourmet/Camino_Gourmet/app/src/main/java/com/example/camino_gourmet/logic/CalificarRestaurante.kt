@@ -28,7 +28,14 @@ import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Comentario
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Sesion
+import com.example.camino_gourmet.data.Sesion.Companion.imagesRef
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class CalificarRestaurante : AppCompatActivity() {
@@ -45,13 +52,14 @@ class CalificarRestaurante : AppCompatActivity() {
     lateinit var ratingBar : RatingBar
     lateinit var editComentario : EditText
 
+    lateinit var restaurantId: String
     lateinit var restaurantName: String
     var calificacion = 0.0
+    var bitmap: Bitmap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calificar_restaurante)
-
 
         val toolbar: Toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
@@ -64,8 +72,10 @@ class CalificarRestaurante : AppCompatActivity() {
         editComentario = findViewById(R.id.editComentario)
         botonCalificar.setOnClickListener{calificar()}
 
+
         restaurantName = intent.getStringExtra("restaurantName").toString()
         calificacion = intent.getDoubleExtra("puntaje",0.0)
+        restaurantId = intent.getStringExtra("restaurantId").toString()
         Log.d("DesdeCalificar", "restaurantName: $restaurantName")
         Log.d("DesdeCalificar", "calificacion: $calificacion")
 
@@ -80,24 +90,42 @@ class CalificarRestaurante : AppCompatActivity() {
     }
 
     fun calificar(){
+        if(bitmap == null){
+            Toast.makeText(this, "Debes adjuntar una imagen", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if(ratingBar.rating == 0.0f || editComentario.text.isEmpty()){
+            Toast.makeText(this, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
         var calificacion = ratingBar.rating
         var contenidoComentario = editComentario.text.toString()
         var nombreCompleto = Sesion.nombre + " " + Sesion.apellido
-        var fechaActual = LocalDate.now()
-        var formato = DateTimeFormatter.ofPattern("dd-MM-yy")
+        var fechaActual = LocalDateTime.now()
+        var formato = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss")
         var fechaComentario = fechaActual.format(formato)
-        var nuevoComentario = Comentario(nombreCompleto, calificacion.toString() + " estrellas", fechaComentario, contenidoComentario)
 
-        var objetoNuevoComentario = Funciones.createNewComment(nuevoComentario)
-        Funciones.addNewCommentToComentarios(this, objetoNuevoComentario)
+        val db = Firebase.firestore
+        val comentariosRef = db.collection("restaurantes").document(restaurantId).collection("comentarios")
 
-        var bundle = Bundle()
-        bundle.putString("restaurantName",restaurantName)
-        bundle.putDouble("puntaje", calificacion.toDouble())
+        uploadImage(bitmap!!) { imageUrl ->
+            val comentario = mapOf(
+                "nombre_completo" to nombreCompleto,
+                "calificacion" to calificacion,
+                "fecha" to fechaComentario,
+                "descripcion" to contenidoComentario,
+                "imageUrl" to imageUrl
+            )
 
-        var intent = Intent(this, PerfilRestaurante::class.java)
-        intent.putExtras(bundle)
-        startActivity(intent)
+            comentariosRef.add(comentario)
+                .addOnSuccessListener {
+                    Log.d("ADD-COMENTARIO", "Comentario added successfully to restaurante $restaurantId")
+                }
+                .addOnFailureListener { exception ->
+                    Log.w("ADD-COMENTARIO", "Error adding comentario", exception)
+                }
+            finish()
+        }
     }
 
     // Verificar permisos de cámara
@@ -131,20 +159,44 @@ class CalificarRestaurante : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 CAMERA_REQUEST_CODE -> {
-                    val bitmap = data?.extras?.get("data") as Bitmap
+                    bitmap = data?.extras?.get("data") as Bitmap
                     imageView.setImageBitmap(bitmap)
                     imageBitmap = bitmap // Guardar la imagen
+
                 }
                 GALLERY_REQUEST_CODE -> {
                     val imageUri: Uri? = data?.data
                     imageUri?.let {
                         val inputStream = contentResolver.openInputStream(it)
-                        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
+                        bitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
                         imageView.setImageBitmap(bitmap)
                         imageBitmap = bitmap // Guardar la imagen
+
                     }
                 }
             }
+        }
+    }
+
+    fun uploadImage(bitmap: Bitmap, callback: (String) -> Unit) {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val data = byteArrayOutputStream.toByteArray()
+
+        val imageName = "image_${System.currentTimeMillis()}.png"
+        val imageRef = imagesRef.child(imageName)
+
+        val uploadTask = imageRef.putBytes(data)
+        uploadTask.addOnSuccessListener {
+            imageRef.downloadUrl.addOnSuccessListener { uri ->
+                val imageUrl = uri.toString()
+                Log.d("FirebaseUploadImage", "Image retrieved successfully")
+                callback(imageUrl) // Pass the imageUrl to the callback
+            }.addOnFailureListener { exception ->
+                Log.e("FirebaseUploadImage", "Failed to retrieve image URL", exception)
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("FirebaseUploadImage", "Failed to upload image", exception)
         }
     }
 

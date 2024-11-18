@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,7 @@ class RestaurantsAdapter(context: Context?, private val restaurantes: List<Resta
 
         perfilButton.setOnClickListener {
             val intent = Intent(context, PerfilRestaurante::class.java)
+            intent.putExtra("restaurantId", restaurante?.id)
             intent.putExtra("restaurantName", restaurante?.nombre)
             intent.putExtra("puntaje",restaurante?.calificacion)
             context.startActivity(intent)
