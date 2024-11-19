@@ -47,7 +47,7 @@ class Funciones {
                                         it1, latitud, longitud)
                                 } }
                             if (distancia != null) {
-                                if (visibilidad && distancia <= 10.0) {
+                                if (visibilidad) {
                                     val restaurante = Restaurant(
                                         id,
                                         nombre,

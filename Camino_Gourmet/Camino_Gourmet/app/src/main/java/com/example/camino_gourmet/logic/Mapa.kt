@@ -174,9 +174,7 @@ class Mapa: AppCompatActivity() {
     private fun actualizarUbicacion(location: Location) {
         val userLocation = GeoPoint(location.latitude, location.longitude)
         Data.latitud = location.latitude
-
         Data.longitud = location.longitude
-
 
         val waypoints = ArrayList<GeoPoint>()
         mapView.overlays.remove(roadOverlay) // Elimina el overlay de la ruta
@@ -184,6 +182,7 @@ class Mapa: AppCompatActivity() {
 
 
         waypoints.add(userLocation)
+
 
         if (userMarker != null) {
             userMarker?.remove(mapView)
@@ -203,7 +202,9 @@ class Mapa: AppCompatActivity() {
 
         // Agregar los restaurantes como puntos en la lista
         sortedRestaurants.forEach { restaurant ->
-            waypoints.add(GeoPoint(restaurant.latitud,restaurant.longitud))
+            if(Data.RESTAURANT_LIST.contains(restaurant)){
+                waypoints.add(GeoPoint(restaurant.latitud,restaurant.longitud))
+            }
         }
 
         val road = roadManager.getRoad(waypoints)
@@ -362,6 +363,12 @@ class Mapa: AppCompatActivity() {
 
         botonHabilitado()
 
+        // Eliminar los marcadores anteriores (si existen)
+        for (marker in listaMarkerRest) {
+            mapView.overlays.remove(marker)
+        }
+        listaMarkerRest.clear() // Limpiar la lista de marcadores
+
         userMarker?.remove(mapView)
 
         mapView.setTileSource(TileSourceFactory.MAPNIK)
@@ -472,6 +479,7 @@ class Mapa: AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         mapView.onResume()
+        Funciones.guardarRestaurantes(this, Restaurante)
         val mapController: IMapController = mapView.controller
         mapController.setZoom(18.0)
 

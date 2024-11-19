@@ -52,7 +52,7 @@ class RestaurantsAdapter(context: Context?, private val restaurantes: List<Resta
 
         if (Data.RESTAURANT_ROUTE.contains(restaurante)){
                 añadirButton.setBackgroundColor(Color.GREEN)
-                añadirButton.setText("Cancelar")
+            añadirButton.text = "Cancelar"
         }
 
 
@@ -60,14 +60,14 @@ class RestaurantsAdapter(context: Context?, private val restaurantes: List<Resta
             if (Data.RESTAURANT_ROUTE.contains(restaurante)){
                 Data.RESTAURANT_ROUTE.remove(restaurante)
                 añadirButton.setBackgroundColor(Color.RED)
-                añadirButton.setText("Añadir")
+                añadirButton.text = "Añadir"
                 Toast.makeText(context,"Restaurante eliminado", Toast.LENGTH_SHORT).show()
             }else {
                 if (restaurante != null) {
                     Data.RESTAURANT_ROUTE.add(restaurante)
                 }
                 añadirButton.setBackgroundColor(Color.GREEN)
-                añadirButton.setText("Cancelar")
+                añadirButton.text = "Cancelar"
                 Toast.makeText(context,"Restaurante añadido", Toast.LENGTH_SHORT).show()
             }
 
