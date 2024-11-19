@@ -42,6 +42,9 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.compass.CompassOverlay
 import java.io.IOException
+import android.os.Handler
+import android.view.MotionEvent
+import java.util.Locale
 
 
 class MapaRestaurante: AppCompatActivity() {
@@ -56,8 +59,13 @@ class MapaRestaurante: AppCompatActivity() {
     private var savedMarker: Marker? = null
     private lateinit var compassOverlay: Overlay
     private lateinit var geocoder: Geocoder
+    private lateinit var handler: Handler
+    private var isLongPress = false
+    private var x = 0f
+    private var y = 0f
+    private var longPressMarker: Marker? = null
 
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint("MissingInflatedId", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         /*enableEdgeToEdge()*/
@@ -92,6 +100,53 @@ class MapaRestaurante: AppCompatActivity() {
             false
         }
 
+        handler = Handler()
+
+        // Runnable para detectar el long press
+        val longPressRunnable = Runnable {
+            isLongPress = true
+
+            longPressMarker?.let {
+                mapView.overlays.remove(it)
+            }
+
+            val point = mapView.projection.fromPixels(x.toInt(), y.toInt()) as GeoPoint
+            val marker = Marker(mapView)
+            marker.position = point
+            mapView.overlays.add(marker)
+            mapView.invalidate()
+
+            longPressMarker = marker
+
+            // Obtener la dirección utilizando Geocoder
+            Data.latitud= point.latitude
+            Data.longitud= point.longitude
+            getAddressFromCoordinates(Data.latitud!!, Data.longitud!!)
+        }
+
+        // Configura el listener de toque en el mapa
+        mapView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Guarda las coordenadas del toque
+                    x = event.x
+                    y = event.y
+                    isLongPress = false
+                    // Comienza a contar el tiempo de presión
+                    handler.postDelayed(longPressRunnable, 2000) // Detecta después de 2 segundos
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // Cancela el long press si el usuario levanta el dedo antes de 1 segundo
+                    handler.removeCallbacks(longPressRunnable)
+                }
+            }
+            // Deja que el mapa siga respondiendo al movimiento (retorna true)
+            return@setOnTouchListener false
+        }
+
+        // Habilita el desplazamiento y zoom con gestos
+        mapView.setMultiTouchControls(true)
+
 
         /*
           ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -115,7 +170,28 @@ class MapaRestaurante: AppCompatActivity() {
 
     }
 
-
+    private fun getAddressFromCoordinates(latitude: Double, longitude: Double) {
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses != null) {
+                if (addresses.isNotEmpty()) {
+                    val address = addresses[0]
+                    val addressText = StringBuilder()
+                    if (address != null) {
+                        for (i in 0..address.maxAddressLineIndex) {
+                            addressText.append(address.getAddressLine(i)).append("\n")
+                        }
+                    }
+                    // Asignar el texto generado al EditText
+                    directionText.setText(addressText.toString())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "No se pudo obtener la dirección", Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
 
@@ -133,6 +209,11 @@ class MapaRestaurante: AppCompatActivity() {
                 // Borrar el marcador del destino anterior, si existe
                 if (direccionMarker != null) {
                     mapView.overlays.remove(direccionMarker)
+                }
+
+                // Borrar el marcador del long press anterior, si existe
+                if (longPressMarker !=null){
+                    mapView.overlays.remove(longPressMarker)
                 }
 
                 // Crear y agregar un nuevo marcador para el destino
