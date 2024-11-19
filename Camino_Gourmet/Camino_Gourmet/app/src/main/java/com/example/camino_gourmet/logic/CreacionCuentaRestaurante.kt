@@ -59,6 +59,8 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
         
         ubicacion.isEnabled = false
         ubicacion.isClickable = false
+        Log.d("TILIN", "en Oncreate Latitud: ${Data.latitud}, Longitud: ${Data.longitud}")
+
 
         if (Data.latitud != null && Data.longitud != null){
             var direction = Data.longitud?.let { Data.latitud?.let { it1 -> getLocationText(it1, it) } }
@@ -77,9 +79,32 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
 
         botonMapa.setOnClickListener {
             val intent = Intent(this, MapaRestaurante::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, Data.MY_PERMISSION_LOCATION_CODE)
+
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == Data.MY_PERMISSION_LOCATION_CODE && resultCode == RESULT_OK && data != null) {
+            val latitud = data.getDoubleExtra("latitud", 0.0)
+            val longitud = data.getDoubleExtra("longitud", 0.0)
+
+            // Guarda los valores en tu clase Data
+            Data.latitud = latitud
+            Data.longitud = longitud
+            Log.d("TILIN", "recuperado del intent Latitud: ${Data.latitud}, Longitud: ${Data.longitud}")
+
+            // Actualiza el campo de texto
+            val direccion = getLocationText(latitud, longitud)
+            ubicacion.setText(direccion) // Actualizar el texto del EditText
+        } else {
+            Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
     private fun validarCampos(){
         val nombreText = nombre.text.toString()
@@ -96,7 +121,7 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
                     Data.longitud?.let { it1 ->
                         Restaurante(nombreRestauranteText,spinnerCategoria.selectedItem.toString(),0.0,
                             it1,
-                            it
+                            it, false
                         )
                     }
                 }
@@ -120,22 +145,23 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
     }
 
     private fun getLocationText(latitude: Double, longitude: Double): String {
-        var locationText = "No se pudo obtener la ubicación"  // Texto por defecto
-
         val geocoder = Geocoder(this, Locale.getDefault())
-        try {
-            val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
-
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
             if (!addresses.isNullOrEmpty()) {
                 val address = addresses[0]
-                locationText = address.getAddressLine(0)
+                Log.d("TILIN", "Dirección obtenida: ${address.getAddressLine(0)}")
+                address.getAddressLine(0)
+            } else {
+                Log.d("TILIN", "No se encontraron direcciones para las coordenadas: $latitude, $longitude")
+                "No se pudo obtener la ubicación"
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("TILIN", "Error al obtener la dirección: ${e.message}")
+            "No se pudo obtener la ubicación"
         }
-
-        return locationText
     }
+
 
     fun createAccount(usuario: Usuario){
         Sesion.auth.createUserWithEmailAndPassword(usuario.email, usuario.contrasena)

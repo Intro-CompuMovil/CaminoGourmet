@@ -76,7 +76,7 @@ CreacionCuenta: AppCompatActivity() {
 
         if(nombreText.isNotEmpty() && apellidoText.isNotEmpty() && correoText.isNotEmpty() && usuarioText.isNotEmpty() && contrasenaText.isNotEmpty()){
             //Crear nuevo restaurante con valores por defecto
-            var nuevoRestaurante = Restaurante("","",0.0,0.0,0.0)
+            var nuevoRestaurante = Restaurante("","",0.0,0.0,0.0, false)
 
             //Crear nuevo usuario con los valores introducidos
             var nuevoUsuario = Usuario(Random.nextInt(1000, 10000),usuarioText,nombreText,apellidoText,correoText,nuevoRestaurante, contrasenaText)
@@ -115,7 +115,8 @@ CreacionCuenta: AppCompatActivity() {
             "categoria" to usuario.restaurante.categoria,
             "latitud" to usuario.restaurante.latitud,
             "longitud" to usuario.restaurante.longitud,
-            "nombre" to usuario.restaurante.nombre
+            "nombre" to usuario.restaurante.nombre,
+            "visibilidad" to usuario.restaurante.visibilidad
         )
 
         db.collection("restaurantes")

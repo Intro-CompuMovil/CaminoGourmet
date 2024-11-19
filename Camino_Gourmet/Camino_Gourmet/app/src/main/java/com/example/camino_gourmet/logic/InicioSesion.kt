@@ -108,7 +108,7 @@ class InicioSesion : AppCompatActivity() {
                                         val restauranteData = restauranteDocument.data
                                         // Access specific fields if needed, for example:
                                         val nombre = restauranteData?.get("nombre") as? String
-                                        if (nombre != null && nombre.isNotEmpty())  {
+                                        if (!nombre.isNullOrEmpty())  {
                                             Sesion.restaurante["restaurantId"] = restauranteDocument.id
                                             Sesion.esRestaurante=true
                                             Log.i("GET-RESTAURANTE","Nombre del restaurante: $nombre")
@@ -117,6 +117,7 @@ class InicioSesion : AppCompatActivity() {
                                             Sesion.restaurante["calificacion"] = restauranteData["calificacion"] as? Double ?: 0.0
                                             Sesion.restaurante["longitud"] = restauranteData["longitud"] as? Double ?: 0.0
                                             Sesion.restaurante["latitud"] = restauranteData["latitud"] as? Double ?: 0.0
+                                            Sesion.restaurante["visibilidad"] = restauranteData["visibilidad"] as Boolean ?: false
                                             Log.i("GET-RESTAURANTE", Sesion.restaurante.toString())
                                             Log.i("GET-SESION", Sesion.userId)
                                             Log.i("GET-SESION",

@@ -1,5 +1,6 @@
 package com.example.camino_gourmet.logic
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -16,12 +17,15 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Sesion
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import java.util.concurrent.Executor
 
 class MiRestaurante : AppCompatActivity() {
 
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     lateinit var switchRestaurante: Switch
-    lateinit var nombreRestaurante: TextView
+    private lateinit var nombreRestaurante: TextView
     lateinit var calificacion: TextView
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
@@ -42,7 +46,7 @@ class MiRestaurante : AppCompatActivity() {
 
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater
+        menuInflater
         menuInflater.inflate(R.menu.drawer_menu, menu)
         //Ocultar boton si el usuario no es restaurante
         menu?.findItem(R.id.miRestaurante)?.isVisible = Sesion.esRestaurante
@@ -50,8 +54,8 @@ class MiRestaurante : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        var intentCuenta = Intent(this, Perfil::class.java)
-        var intentInicio = Intent(this, Mapa::class.java)
+        val intentCuenta = Intent(this, Perfil::class.java)
+        val intentInicio = Intent(this, Mapa::class.java)
         when(item.itemId){
             R.id.Cuenta -> startActivity(intentCuenta)
             R.id.miRestaurante -> {}
@@ -113,6 +117,7 @@ class MiRestaurante : AppCompatActivity() {
     }
 
     //Actualizar label y color del switch segun su estado
+    @SuppressLint("SetTextI18n")
     private fun checkSwitch() {
         val stateChecked = switchRestaurante.isChecked
         if (stateChecked) {
@@ -130,6 +135,21 @@ class MiRestaurante : AppCompatActivity() {
             isSwitchToggledManually = true //Permitir toggle manual del switch
             switchRestaurante.isChecked = !switchRestaurante.isChecked
             checkSwitch() //Actualizar switch
+
+           // Actualizar visibilidad en Firebase
+            val isAbierto = switchRestaurante.isChecked
+            val db = Firebase.firestore
+            val restauranteId = Sesion.restaurante["restaurantId"].toString()
+
+            db.collection("restaurantes").document(restauranteId)
+                .update("visibilidad", isAbierto)
+                .addOnSuccessListener {
+                    val estado = if (isAbierto) "abierto" else "cerrado"
+                    Toast.makeText(this, "El restaurante ahora está $estado", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this, "Error al cambiar la visibilidad: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 

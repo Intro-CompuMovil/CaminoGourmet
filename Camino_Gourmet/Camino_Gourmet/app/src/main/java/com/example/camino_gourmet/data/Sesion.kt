@@ -20,7 +20,8 @@ class Sesion {
             "categoria" to "",
             "calificacion" to 0.0,
             "longitud" to 0.0,
-            "latitud" to 0.0
+            "latitud" to 0.0,
+            "visibilidad" to false
         )
         var auth = Firebase.auth
         var imagesRef = Firebase.storage.reference.child("images")

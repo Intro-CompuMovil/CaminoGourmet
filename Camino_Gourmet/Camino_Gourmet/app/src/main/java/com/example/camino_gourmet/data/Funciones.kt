@@ -33,14 +33,35 @@ class Funciones {
                         for (document in documents) {
                             val doc = document.data
                             val id = document.id
-                            val calificacion = doc?.get("calificacion") as? Double ?: 0.0
-                            val categoria = doc?.get("categoria") as? String ?: ""
-                            val latitud = doc?.get("latitud") as? Double ?: 0.0
-                            val longitud = doc?.get("longitud") as? Double ?: 0.0
-                            val nombre = doc?.get("nombre") as? String ?: ""
-                            val restaurante = Restaurant(id, nombre, categoria, calificacion, longitud, latitud)
-                            Data.RESTAURANT_LIST.add(restaurante)
-                            Log.i("FirestoreQuery", "Found document: $doc")
+                            val calificacion = doc["calificacion"] as? Double ?: 0.0
+                            val categoria = doc["categoria"] as? String ?: ""
+                            val latitud = doc["latitud"] as? Double ?: 0.0
+                            val longitud = doc["longitud"] as? Double ?: 0.0
+                            val nombre = doc["nombre"] as? String ?: ""
+                            val visibilidad = doc["visibilidad"] as? Boolean ?: false
+
+                            // Verifica si el restaurante cumple con las condiciones
+                            val distancia =
+                                Data.latitud?.let { Data.longitud?.let { it1 ->
+                                    distance(it,
+                                        it1, latitud, longitud)
+                                } }
+                            if (distancia != null) {
+                                if (visibilidad && distancia <= 10.0) {
+                                    val restaurante = Restaurant(
+                                        id,
+                                        nombre,
+                                        categoria,
+                                        calificacion,
+                                        longitud,
+                                        latitud
+                                    )
+                                    Data.RESTAURANT_LIST.add(restaurante)
+                                    Log.i("FirestoreQuery", "Added restaurant: $doc")
+                                } else {
+                                    Log.i("FirestoreQuery", "Skipped restaurant: $doc")
+                                }
+                            }
                         }
                     }
                 }

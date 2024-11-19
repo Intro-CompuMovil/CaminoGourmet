@@ -53,20 +53,9 @@ class MapaRestaurante: AppCompatActivity() {
     private lateinit var direccion: String
     private lateinit var userMarker: Marker
     private var direccionMarker: Marker? = null
+    private var savedMarker: Marker? = null
     private lateinit var compassOverlay: Overlay
-    private lateinit var mLocationRequest: LocationRequest
-    private lateinit var mLocationCallback: LocationCallback
     private lateinit var geocoder: Geocoder
-    private val getLocationSettings = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        Log.i("LOCATION", "Result from settings: ${result.resultCode}")
-        if (result.resultCode == RESULT_OK) {
-            var settingsOK = true
-            startLocationUpdates()
-        }
-    }
-
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,22 +76,10 @@ class MapaRestaurante: AppCompatActivity() {
         val algo = Data.MY_PERMISSION_LOCATION_CODE
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        mLocationRequest = createLocationRequest()
-
-        mLocationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                val location = locationResult.lastLocation
-                Log.i("LOCATION", "Location update in the callback: $location")
-                if (location != null) {
-                    actualizarUbicacion(location)
-                }
-            }
-        }
 
 
         pedirPermiso(this, Manifest.permission.ACCESS_FINE_LOCATION, "Acceso a Ubicacion",algo)
         pedirPermiso(this, Manifest.permission.ACCESS_COARSE_LOCATION, "Acceso a Ubicacion",algo)
-        checkLocationSettings()
 
         geocoder = Geocoder(this)  // Inicializar el Geocoder
 
@@ -127,13 +104,18 @@ class MapaRestaurante: AppCompatActivity() {
 
         boton.setOnClickListener {
             // Enviar la direccion del restaurante para luego convertir en longitud y latitud
-            val intentDireccion = Intent(this, CreacionCuentaRestaurante::class.java).apply {
-            }
-            startActivity(intentDireccion)
+            val intent = Intent()
+            intent.putExtra("latitud", Data.latitud)
+            intent.putExtra("longitud", Data.longitud)
+            setResult(RESULT_OK, intent) // Envía los datos de vuelta
+            finish() // Finaliza la actividad para regresar a la principal
+
 
         }
 
     }
+
+
 
 
 
@@ -172,62 +154,6 @@ class MapaRestaurante: AppCompatActivity() {
             }
         } catch (e: IOException) {
             Toast.makeText(this, "Error al buscar la dirección", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-
-    private fun actualizarUbicacion(location: Location) {
-        val userLocation = GeoPoint(location.latitude, location.longitude)
-
-        if (direccionMarker == null){
-            Data.latitud = location.latitude
-            Data.longitud = location.longitude
-        }
-
-        userMarker.remove(mapView)
-
-        // Añadir un marcador en la ubicación del usuario
-        userMarker = Marker(mapView)
-        userMarker.position = userLocation
-        userMarker.icon = crearMarcador(Color.RED)
-        userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        userMarker.title = "Tu ubicación"
-        userMarker.alpha = 1.0f
-        mapView.overlays.add(userMarker)
-
-        //Refrescar el mapa
-        mapView.invalidate()
-    }
-
-    private fun checkLocationSettings() {
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest)
-        val client: SettingsClient = LocationServices.getSettingsClient(this)
-        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-        task.addOnSuccessListener {
-            Log.i("LOCATION", "GPS is ON")
-            var settingsOK = true
-            startLocationUpdates()
-        }
-    }
-
-    private fun createLocationRequest(): LocationRequest =
-        // New builder
-        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
-            setMinUpdateIntervalMillis(5000)
-        }.build()
-
-
-
-    private fun startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null)
         }
     }
 
@@ -311,32 +237,57 @@ class MapaRestaurante: AppCompatActivity() {
 
     private fun ubicarRestaurante(location: Location) {
 
-        val userLocation = GeoPoint(location.latitude, location.longitude)
+        // Verifica si hay una ubicación guardada en el companion object
+        Log.d("TILIN", " al entrar a la ubicacion Latitud: ${Data.latitud}, Longitud: ${Data.longitud}")
+        val savedLat = Data.latitud
+        val savedLon = Data.longitud
 
-        mapView.setTileSource(TileSourceFactory.MAPNIK)
-        mapView.setBuiltInZoomControls(true)
-        mapView.setMultiTouchControls(true)
+        if (savedLat != null && savedLon != null) {
+            val savedLocation = GeoPoint(savedLat, savedLon)
+            mapView.controller.setCenter(savedLocation)
+            mapView.controller.setZoom(15.0)
 
-        //Ubicar el mapa en la ubicación del usuario
-        mapView.controller.setZoom(15.0)
-        mapView.controller.setCenter(userLocation)
+            // Añadir marcador si es necesario
+            savedMarker = Marker(mapView)
+            savedMarker!!.position = savedLocation
+            savedMarker!!.icon = crearMarcador(Color.BLUE) // Cambia el color del marcador si es necesario
+            savedMarker!!.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            savedMarker!!.title = "Ubicación guardada"
+            mapView.overlays.add(savedMarker)
 
-        // Añadir un marcador en la ubicación del usuario
-        userMarker = Marker(mapView)
-        userMarker.position = userLocation
-        userMarker.icon = crearMarcador(Color.RED)
-        userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        userMarker.title = "Tu ubicación"
-        userMarker.alpha = 1.0f
-        mapView.overlays.add(userMarker)
+            mapView.invalidate()
+        }else{
+            val userLocation = GeoPoint(location.latitude, location.longitude)
+            Data.latitud = location.latitude
+            Data.longitud = location.longitude
 
-        compassOverlay = CompassOverlay(this, mapView)
-        (compassOverlay as CompassOverlay).enableCompass()
-        mapView.overlays.add(compassOverlay)
+            mapView.setTileSource(TileSourceFactory.MAPNIK)
+            mapView.setBuiltInZoomControls(true)
+            mapView.setMultiTouchControls(true)
+
+            //Ubicar el mapa en la ubicación del usuario
+            mapView.controller.setZoom(15.0)
+            mapView.controller.setCenter(userLocation)
+
+            // Añadir un marcador en la ubicación del usuario
+            userMarker = Marker(mapView)
+            userMarker.position = userLocation
+            userMarker.icon = crearMarcador(Color.RED)
+            userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            userMarker.title = "Tu ubicación"
+            userMarker.alpha = 1.0f
+            mapView.overlays.add(userMarker)
+
+            compassOverlay = CompassOverlay(this, mapView)
+            (compassOverlay as CompassOverlay).enableCompass()
+            mapView.overlays.add(compassOverlay)
 
 
-        //Refrescar el mapa
-        mapView.invalidate()
+            //Refrescar el mapa
+            mapView.invalidate()
+
+        }
+
     }
 
     private fun crearMarcador(color: Int): GradientDrawable {
@@ -369,13 +320,9 @@ class MapaRestaurante: AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        stopLocationUpdates()
         mapView.onPause()
     }
 
-    private fun stopLocationUpdates() {
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback)
-    }
 
 
 

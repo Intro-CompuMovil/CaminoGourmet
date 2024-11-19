@@ -5,5 +5,6 @@ data class Restaurante(
     val categoria: String,
     val calificacion: Double,
     val longitud: Double,
-    val latitud: Double
+    val latitud: Double,
+    val visibilidad: Boolean
 )
