@@ -23,16 +23,17 @@ import com.example.camino_gourmet.data.Data
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Sesion
 import com.example.camino_gourmet.data.Restaurant
+import com.example.camino_gourmet.data.RestaurantesListener
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.Locale
 
-class Paradas: AppCompatActivity() {
+class Paradas: AppCompatActivity(), RestaurantesListener {
 
     private lateinit var Restaurante: String
     private lateinit var statusTextView: TextView
     private  lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private lateinit var listView: ListView
+    lateinit var listView: ListView
     private lateinit var seleccion: Button
 
 
@@ -52,17 +53,9 @@ class Paradas: AppCompatActivity() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         Restaurante = intent.getStringExtra("TipoRestaurante") ?: ""
-        Funciones.guardarRestaurantes(this, Restaurante)
+        Funciones.escucharRestaurantes(this, Restaurante) // `this` es un `RestaurantesListener`
 
-        val sortedRestaurants = Data.RESTAURANT_LIST.sortedBy { restaurant ->
-            Data.latitud?.let { Data.longitud?.let { it1 ->
-                Funciones.distance(it,
-                    it1, restaurant.latitud, restaurant.longitud)
-            } }
-        }
 
-        val adapter =  RestaurantsAdapter(this,sortedRestaurants)
-        listView.adapter = adapter
 
         var ubicacion = Data.longitud?.let { Data.latitud?.let { it1 -> getLocationText(it1, it) } }
 
@@ -81,6 +74,17 @@ class Paradas: AppCompatActivity() {
         //Ocultar boton si el usuario no es restaurante
         menu?.findItem(R.id.miRestaurante)?.isVisible = Sesion.esRestaurante
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onRestaurantesActualizados(listaRestaurantes: List<Restaurant>) {
+        val sortedRestaurants = listaRestaurantes.sortedBy { restaurant ->
+            Data.latitud?.let { lat ->
+                Data.longitud?.let { lng -> Funciones.distance(lat, lng, restaurant.latitud, restaurant.longitud) }
+            }
+        }
+
+        val adapter = RestaurantsAdapter(this, sortedRestaurants)
+        listView.adapter = adapter
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

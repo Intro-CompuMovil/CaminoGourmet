@@ -3,10 +3,8 @@ package com.example.camino_gourmet.logic
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import org.osmdroid.config.Configuration
@@ -34,6 +32,7 @@ import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Data
 import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Restaurant
+import com.example.camino_gourmet.data.RestaurantesListener
 import com.example.camino_gourmet.data.Sesion
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -44,9 +43,6 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
 import com.google.android.gms.location.SettingsClient
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.tasks.Task
 import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
@@ -55,9 +51,8 @@ import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.compass.CompassOverlay
-import kotlin.math.roundToInt
 
-class Mapa: AppCompatActivity() {
+class Mapa: AppCompatActivity(), RestaurantesListener {
 
     private lateinit var statusTextView: TextView
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
@@ -122,8 +117,9 @@ class Mapa: AppCompatActivity() {
 
         // Recibir el tipo de restaurante seleccionado
         Restaurante = Sesion.restaurantMode
+        Funciones.escucharRestaurantes(this, Restaurante) // `this` es un `RestaurantesListener`
 
-        Funciones.guardarRestaurantes(this, Restaurante)
+
         Button = findViewById(R.id.button)
         boton = findViewById(R.id.botonCentrar)
 
@@ -158,6 +154,17 @@ class Mapa: AppCompatActivity() {
         }
 
 
+    }
+
+    override fun onRestaurantesActualizados(listaRestaurantes: List<Restaurant>) {
+        if (Data.latitud == null || Data.longitud == null) {
+            Log.e("onRestaurantesActualizados", "Latitud o longitud no están disponibles")
+            return // Termina la ejecución si los valores son null
+        }
+        val location = Location("dummyprovider") // Puedes usar un nombre cualquiera para el proveedor
+        location.latitude = Data.latitud!!
+        location.longitude = Data.longitud!!
+        buscarRestaurante(location)
     }
 
     private fun botonHabilitado(){
@@ -260,7 +267,7 @@ class Mapa: AppCompatActivity() {
 
     private fun createLocationRequest(): LocationRequest =
         // New builder
-        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
+        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000).apply {
             setMinUpdateIntervalMillis(5000)
         }.build()
 
@@ -356,9 +363,11 @@ class Mapa: AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun buscarRestaurante(location: Location) {
+    fun buscarRestaurante(location: Location) {
 
         val userLocation = GeoPoint(location.latitude, location.longitude)
+        Data.latitud = location.latitude
+        Data.longitud = location.longitude
         val restaurantes = Data.RESTAURANT_LIST
 
         botonHabilitado()
@@ -404,7 +413,7 @@ class Mapa: AppCompatActivity() {
 
 
             markerRestaurante.alpha =
-                if (Data.RESTAURANT_ROUTE.contains(restaurant)) 1.0f else 0.09f
+                if (Data.RESTAURANT_ROUTE.contains(restaurant)) 3.0f else 0.09f
 
             // Añadir el marcador al mapa
             mapView.overlays.add(markerRestaurante)
@@ -415,6 +424,7 @@ class Mapa: AppCompatActivity() {
         //Refrescar el mapa
         mapView.invalidate()
     }
+
 
     private fun crearMarcador(color: Int): GradientDrawable {
         val drawable = GradientDrawable()
@@ -479,7 +489,6 @@ class Mapa: AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         mapView.onResume()
-        Funciones.guardarRestaurantes(this, Restaurante)
         val mapController: IMapController = mapView.controller
         mapController.setZoom(18.0)
 
@@ -495,14 +504,6 @@ class Mapa: AppCompatActivity() {
             setLocation()
         }
 
-
-        for (restaurant in Data.RESTAURANT_LIST) {
-            listaMarkerRest.forEach { marker ->
-                marker.alpha = if (Data.RESTAURANT_ROUTE.contains(restaurant)) 1.0f else 0.09f
-            }
-        }
-
-
     }
 
     override fun onPause() {
@@ -514,6 +515,9 @@ class Mapa: AppCompatActivity() {
     private fun stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback)
     }
+
+
+
 
 }
 

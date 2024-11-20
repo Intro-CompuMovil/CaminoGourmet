@@ -23,7 +23,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Camino_Gourmet"
-        tools:targetApi="31">
+        tools:targetApi="31"
+        tools:ignore="ExtraText">
         <activity
             android:name=".logic.CreacionCuentaRestaurante"
             android:exported="false" />
@@ -65,7 +66,7 @@
             android:exported="true" />
         <activity
             android:name=".logic.Paradas"
-            android:exported="true" />
+            android:exported="true"/>
         <activity
             android:name=".logic.InicioSesion"
             android:exported="true">

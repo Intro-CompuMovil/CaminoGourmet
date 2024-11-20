@@ -2,8 +2,12 @@ package com.example.camino_gourmet.data
 
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import com.example.camino_gourmet.data.Data.Companion.RADIUS_OF_EARTH_KM
+import com.example.camino_gourmet.logic.Mapa
+import com.example.camino_gourmet.logic.Paradas
+import com.example.camino_gourmet.logic.RestaurantsAdapter
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import org.json.JSONObject
@@ -17,57 +21,64 @@ import java.io.FileOutputStream
 
 class Funciones {
     companion object {
-        fun guardarRestaurantes(context: Context, categoriaSeleccionada: String) {
+        fun escucharRestaurantes(listener: RestaurantesListener, categoriaSeleccionada: String) {
 
             val db = Firebase.firestore
             val collectionRef = db.collection("restaurantes")
             val query = collectionRef
                 .whereEqualTo("categoria", categoriaSeleccionada)
-            query.get()
-                .addOnSuccessListener { documents ->
-                    if (documents.isEmpty) {
-                        Log.i("FirestoreQuery", "No matching documents found.")
-                    } else {
-                        // Loop through documents and access their data
-                        Data.RESTAURANT_LIST.clear()
-                        for (document in documents) {
-                            val doc = document.data
-                            val id = document.id
-                            val calificacion = doc["calificacion"] as? Double ?: 0.0
-                            val categoria = doc["categoria"] as? String ?: ""
-                            val latitud = doc["latitud"] as? Double ?: 0.0
-                            val longitud = doc["longitud"] as? Double ?: 0.0
-                            val nombre = doc["nombre"] as? String ?: ""
-                            val visibilidad = doc["visibilidad"] as? Boolean ?: false
+            query.addSnapshotListener{ snapshot, error->
+                if(error != null){
+                    Log.e("FirestoreQuery","Error: ${error.message}")
+                    return@addSnapshotListener
+                }
 
-                            // Verifica si el restaurante cumple con las condiciones
-                            val distancia =
-                                Data.latitud?.let { Data.longitud?.let { it1 ->
-                                    distance(it,
-                                        it1, latitud, longitud)
-                                } }
-                            if (distancia != null) {
-                                if (visibilidad) {
-                                    val restaurante = Restaurant(
-                                        id,
-                                        nombre,
-                                        categoria,
-                                        calificacion,
-                                        longitud,
-                                        latitud
+                if (snapshot != null &&snapshot.documents.isNotEmpty()){
+                    val newRestaurantList = mutableListOf<Restaurant>()
+                    for (document in snapshot.documents) {
+                        val doc = document.data
+                        val id = document.id
+                        val calificacion = doc?.get("calificacion") as? Double ?: 0.0
+                        val categoria = doc?.get("categoria") as? String ?: ""
+                        val latitud = doc?.get("latitud") as? Double ?: 0.0
+                        val longitud = doc?.get("longitud") as? Double ?: 0.0
+                        val nombre = doc?.get("nombre") as? String ?: ""
+                        val visibilidad = doc?.get("visibilidad") as? Boolean ?: false
+
+                        // Verifica si el restaurante cumple con las condiciones
+                        val distancia =
+                            Data.latitud?.let {
+                                Data.longitud?.let { it1 ->
+                                    distance(
+                                        it,
+                                        it1, latitud, longitud
                                     )
-                                    Data.RESTAURANT_LIST.add(restaurante)
-                                    Log.i("FirestoreQuery", "Added restaurant: $doc")
-                                } else {
-                                    Log.i("FirestoreQuery", "Skipped restaurant: $doc")
                                 }
+                            }
+                        if (distancia != null) {
+                            if (visibilidad) {
+                                val restaurante = Restaurant(
+                                    id,
+                                    nombre,
+                                    categoria,
+                                    calificacion,
+                                    longitud,
+                                    latitud
+                                )
+                                newRestaurantList.add(restaurante)
+                                Log.i("FirestoreQuery", "Added restaurant: $doc")
+                            } else {
+                                Log.i("FirestoreQuery", "Skipped restaurant: $doc")
                             }
                         }
                     }
+                    Data.RESTAURANT_LIST.clear()
+                    Data.RESTAURANT_LIST.addAll(newRestaurantList)
+                    listener.onRestaurantesActualizados(newRestaurantList)
+                } else{
+                    Log.d("FirestoreQuery","Esperando Datos...")
                 }
-                .addOnFailureListener { exception ->
-                    Log.e("FirestoreQuery", "Error getting documents: $exception")
-                }
+            }
         }
 
         fun loadJSONFromAsset(context: Context): String? {
