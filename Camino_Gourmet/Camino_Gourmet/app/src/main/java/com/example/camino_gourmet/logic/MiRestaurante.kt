@@ -2,6 +2,8 @@ package com.example.camino_gourmet.logic
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -20,6 +22,7 @@ import com.example.camino_gourmet.R
 import com.example.camino_gourmet.data.Sesion
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.util.Locale
 import java.util.concurrent.Executor
 
 class MiRestaurante : AppCompatActivity() {
@@ -28,6 +31,7 @@ class MiRestaurante : AppCompatActivity() {
     lateinit var switchRestaurante: Switch
     private lateinit var nombreRestaurante: TextView
     lateinit var calificacion: TextView
+    lateinit var direccion: TextView
     private lateinit var biometricPrompt: BiometricPrompt
     private lateinit var promptInfo: BiometricPrompt.PromptInfo
     private lateinit var executor: Executor
@@ -87,6 +91,28 @@ class MiRestaurante : AppCompatActivity() {
             switchRestaurante.text = "Cerrado"
             switchRestaurante.setTextColor(resources.getColor(R.color.rojo))
         }
+
+        direccion = findViewById(R.id.direccionRestaurante)
+        var latitude = Sesion.restaurante["latitud"] as Double
+        var longitude = Sesion.restaurante["longitud"] as Double
+        getLocationText(latitude, longitude)
+    }
+
+    private fun getLocationText(latitude: Double, longitude: Double) {
+        var locationText = "No se pudo obtener la ubicación"  // Texto por defecto
+
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                locationText = address.getAddressLine(0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        direccion.text = locationText
     }
 
     //Funcion para inicializar/configurar prompt de huella

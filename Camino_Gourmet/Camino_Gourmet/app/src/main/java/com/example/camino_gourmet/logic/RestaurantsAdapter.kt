@@ -47,6 +47,8 @@ class RestaurantsAdapter(context: Context?, private val restaurantes: List<Resta
             intent.putExtra("restaurantId", restaurante?.id)
             intent.putExtra("restaurantName", restaurante?.nombre)
             intent.putExtra("puntaje",restaurante?.calificacion)
+            intent.putExtra("latitud", restaurante?.latitud)
+            intent.putExtra("longitud",restaurante?.longitud)
             context.startActivity(intent)
         }
 

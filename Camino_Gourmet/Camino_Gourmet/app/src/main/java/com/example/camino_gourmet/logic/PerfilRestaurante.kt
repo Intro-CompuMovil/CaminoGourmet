@@ -3,6 +3,8 @@ package com.example.camino_gourmet.logic
 import ComentariosAdapter
 import android.content.Context
 import android.content.Intent
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -30,6 +32,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.properties.Delegates
 
 class PerfilRestaurante : AppCompatActivity() {
     private lateinit var comentariosView: RecyclerView
@@ -37,8 +41,11 @@ class PerfilRestaurante : AppCompatActivity() {
     lateinit var botonCalificarRestaurante: Button
     lateinit var restaurantName: String
     var calificacion = 0.0
+    private var latitud by Delegates.notNull<Double>()
+    private var longitud by Delegates.notNull<Double>()
     lateinit var restaurantId: String
     lateinit var calificacionRestaurante: TextView
+    lateinit var direccion: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,10 +58,13 @@ class PerfilRestaurante : AppCompatActivity() {
         restaurantName = intent.getStringExtra("restaurantName").toString()
         restaurantName = intent.getStringExtra("restaurantName").toString()
         calificacion = intent.getDoubleExtra("puntaje",0.0)
+        latitud = intent.getDoubleExtra("latitud", 0.0)
+        longitud = intent.getDoubleExtra("longitud", 0.0)
         Log.i("DesdePerfilRestaurante", "restaurantId: $restaurantId")
 
         val textoNombreRestaurante = findViewById<TextView>(R.id.textoNombreRestaurante)
         calificacionRestaurante = findViewById<TextView>(R.id.Calificacion)
+        direccion = findViewById(R.id.direccion)
 
         textoNombreRestaurante.text = restaurantName
         calificacionRestaurante.text = calificacion.toString()
@@ -71,6 +81,8 @@ class PerfilRestaurante : AppCompatActivity() {
         }else{
             botonCalificarRestaurante.visibility = View.GONE
         }
+
+        getLocationText(latitud, longitud)
 
 
     }
@@ -141,6 +153,24 @@ class PerfilRestaurante : AppCompatActivity() {
 
             }
     }
+
+    private fun getLocationText(latitude: Double, longitude: Double) {
+        var locationText = "No se pudo obtener la ubicación"  // Texto por defecto
+
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                locationText = address.getAddressLine(0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        direccion.text = locationText
+    }
+
 
     private data class ComentarioResponse(
         val comentarios: List<Comentario>

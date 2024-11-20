@@ -126,6 +126,7 @@
                     android:src="@drawable/locationicon"
                     />
                 <TextView
+                    android:id="@+id/direccionRestaurante"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cra. 20c #72-41"
