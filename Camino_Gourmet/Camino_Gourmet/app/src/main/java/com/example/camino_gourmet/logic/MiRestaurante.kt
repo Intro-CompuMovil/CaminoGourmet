@@ -3,6 +3,7 @@ package com.example.camino_gourmet.logic
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -74,7 +75,18 @@ class MiRestaurante : AppCompatActivity() {
         calificacion.text = Sesion.restaurante.get("calificacion").toString()
 
         switchRestaurante = findViewById(R.id.switchRestaurante)
-        checkSwitch() //Inicializar estado del switch
+        //initial state for switch
+        var initialVisibility = Sesion.restaurante["visibilidad"] as Boolean
+        Log.i("RestauranteVisibility", initialVisibility.toString())
+        if(initialVisibility == true){
+            switchRestaurante.isChecked = true
+            switchRestaurante.text = "Abierto"
+            switchRestaurante.setTextColor(resources.getColor(R.color.verde))
+        }else{
+            switchRestaurante.isChecked = false
+            switchRestaurante.text = "Cerrado"
+            switchRestaurante.setTextColor(resources.getColor(R.color.rojo))
+        }
     }
 
     //Funcion para inicializar/configurar prompt de huella

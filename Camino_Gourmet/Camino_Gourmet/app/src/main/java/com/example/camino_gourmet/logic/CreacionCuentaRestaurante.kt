@@ -192,7 +192,8 @@ class CreacionCuentaRestaurante : AppCompatActivity() {
             "categoria" to usuario.restaurante.categoria,
             "latitud" to usuario.restaurante.latitud,
             "longitud" to usuario.restaurante.longitud,
-            "nombre" to usuario.restaurante.nombre
+            "nombre" to usuario.restaurante.nombre,
+            "visibilidad" to usuario.restaurante.visibilidad
         )
         Log.d("CREATE-USER", "Llegue hasta aca")
         Log.d("CREATE-USER", "Restaurante: $restaurante")

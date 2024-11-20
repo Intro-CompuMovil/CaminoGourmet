@@ -345,7 +345,15 @@ class Funciones {
             Sesion.apellido = ""
             Sesion.email = ""
             Sesion.esRestaurante = false
-            Sesion.restaurante.clear()
+            Sesion.restaurante = mutableMapOf(
+                "restaurantId" to "",
+                "nombre" to "",
+                "categoria" to "",
+                "calificacion" to 0.0,
+                "longitud" to 0.0,
+                "latitud" to 0.0,
+                "visibilidad" to false
+            )
         }
     }
 }
