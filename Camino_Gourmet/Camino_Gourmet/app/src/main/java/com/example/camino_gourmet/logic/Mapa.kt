@@ -297,10 +297,16 @@ class Mapa: AppCompatActivity(), RestaurantesListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         var intentCuenta = Intent(this, Perfil::class.java)
         var intentMiRestaurante = Intent(this, MiRestaurante::class.java)
+        var intentCerrarSesion = Intent(this, InicioSesion::class.java)
         when (item.itemId) {
             R.id.Cuenta -> startActivity(intentCuenta)
             R.id.miRestaurante -> startActivity(intentMiRestaurante)
             R.id.Inicio -> {}
+            R.id.cerrarSesion -> {
+                Funciones.clearSesion()
+                intentCerrarSesion.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intentCerrarSesion)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -476,11 +482,11 @@ class Mapa: AppCompatActivity(), RestaurantesListener {
 
     private fun showPermissionStatus(granted: Boolean) {
         if (!granted) {
-            statusTextView.text = "PERMISO DENEGADO!"
+            statusTextView.text = "¡PERMISO DENEGADO!"
             boton.visibility = View.GONE
             statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
         } else {
-            statusTextView.text = "BIENVENIDO!!" // Limpiar el mensaje cuando se cargan los contactos
+            statusTextView.text = "¡BIENVENIDO!" // Limpiar el mensaje cuando se cargan los contactos
             boton.visibility = View.VISIBLE
             statusTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
         }

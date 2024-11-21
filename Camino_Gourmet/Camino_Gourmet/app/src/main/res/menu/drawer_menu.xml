@@ -10,6 +10,9 @@
     <item
         android:id="@+id/miRestaurante"
         android:title="Mi restaurante" />
+    <item
+        android:id="@+id/cerrarSesion"
+        android:title="Cerrar Sesión" />
 
 
 </menu>

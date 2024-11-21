@@ -17,7 +17,7 @@
         >
 
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/imagenRestaurante"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="@drawable/rounded_image_slight"
@@ -99,7 +99,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cra. 20c #72-41"
-                    android:textSize="23sp"
+                    android:textSize="17sp"
                     android:textColor="@color/textoGris"
                     />
             </LinearLayout>
@@ -110,7 +110,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:text="Calificar restaurante"
             android:textSize="20sp"
             android:backgroundTint="@color/naranjaFocus"
@@ -129,7 +129,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/comentariosView"
             android:layout_width="match_parent"
-            android:layout_height="320dp"
+            android:layout_height="200dp"
             />
 
     </LinearLayout>

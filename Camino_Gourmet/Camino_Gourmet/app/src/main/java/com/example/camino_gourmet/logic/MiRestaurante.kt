@@ -11,6 +11,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.CompoundButton
+import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.example.camino_gourmet.R
+import com.example.camino_gourmet.data.Funciones
 import com.example.camino_gourmet.data.Sesion
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -61,10 +63,16 @@ class MiRestaurante : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val intentCuenta = Intent(this, Perfil::class.java)
         val intentInicio = Intent(this, Mapa::class.java)
+        var intentCerrarSesion = Intent(this, InicioSesion::class.java)
         when(item.itemId){
             R.id.Cuenta -> startActivity(intentCuenta)
             R.id.miRestaurante -> {}
             R.id.Inicio -> startActivity(intentInicio)
+            R.id.cerrarSesion -> {
+                Funciones.clearSesion()
+                intentCerrarSesion.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intentCerrarSesion)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -72,6 +80,18 @@ class MiRestaurante : AppCompatActivity() {
 
     //Funcion para inicializar elementos de la interfaz
     private fun initializeUIElements() {
+        val categoria = Sesion.restaurante["categoria"]
+        val imagenRestaurante = findViewById<ImageView>(R.id.imagenRestaurante)
+
+        if(categoria == "Hamburguesa"){
+            imagenRestaurante.setImageResource(R.drawable.restaurant)
+        }else if(categoria == "Sushi"){
+            imagenRestaurante.setImageResource(R.drawable.sushirestaurant)
+        }else if(categoria == "Pizza"){
+            imagenRestaurante.setImageResource(R.drawable.pizzarestaurant)
+        }
+
+
         nombreRestaurante = findViewById(R.id.nombreRestaurante)
         nombreRestaurante.text = Sesion.restaurante.get("nombre").toString()
 

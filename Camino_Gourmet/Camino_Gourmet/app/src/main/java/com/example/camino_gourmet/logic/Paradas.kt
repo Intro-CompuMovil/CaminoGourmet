@@ -68,6 +68,13 @@ class Paradas: AppCompatActivity(), RestaurantesListener {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        var ubicacion = Data.longitud?.let { Data.latitud?.let { it1 -> getLocationText(it1, it) } }
+        statusTextView.text = "Ubicado en latitud $ubicacion"
+        Funciones.escucharRestaurantes(this, Restaurante)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         menuInflater.inflate(R.menu.drawer_menu, menu)
@@ -91,10 +98,16 @@ class Paradas: AppCompatActivity(), RestaurantesListener {
         var intentCuenta = Intent(this, Perfil::class.java)
         var intentMiRestaurante = Intent(this, MiRestaurante::class.java)
         var intentInicio = Intent(this, Mapa::class.java)
+        var intentCerrarSesion = Intent(this, InicioSesion::class.java)
         when(item.itemId){
             R.id.Cuenta -> startActivity(intentCuenta)
             R.id.miRestaurante -> startActivity(intentMiRestaurante)
             R.id.Inicio -> startActivity(intentInicio)
+            R.id.cerrarSesion -> {
+                Funciones.clearSesion()
+                intentCerrarSesion.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intentCerrarSesion)
+            }
         }
         return super.onOptionsItemSelected(item)
     }

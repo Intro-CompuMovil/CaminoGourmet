@@ -105,6 +105,8 @@ class CalificarRestaurante : AppCompatActivity() {
         var formato = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss")
         var fechaComentario = fechaActual.format(formato)
 
+        Toast.makeText(this, "Creando tu comentario...", Toast.LENGTH_LONG).show()
+
         val db = Firebase.firestore
         val comentariosRef = db.collection("restaurantes").document(restaurantId).collection("comentarios")
 
@@ -224,10 +226,16 @@ class CalificarRestaurante : AppCompatActivity() {
         var intentCuenta = Intent(this, Perfil::class.java)
         var intentMiRestaurante = Intent(this, MiRestaurante::class.java)
         var intentInicio = Intent(this, Mapa::class.java)
+        var intentCerrarSesion = Intent(this, InicioSesion::class.java)
         when(item.itemId){
             R.id.Cuenta -> startActivity(intentCuenta)
             R.id.miRestaurante -> startActivity(intentMiRestaurante)
             R.id.Inicio -> startActivity(intentInicio)
+            R.id.cerrarSesion -> {
+                Funciones.clearSesion()
+                intentCerrarSesion.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intentCerrarSesion)
+            }
         }
         return super.onOptionsItemSelected(item)
     }

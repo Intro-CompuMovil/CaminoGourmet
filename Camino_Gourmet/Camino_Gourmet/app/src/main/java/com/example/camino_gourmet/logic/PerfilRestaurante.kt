@@ -12,6 +12,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -40,12 +41,14 @@ class PerfilRestaurante : AppCompatActivity() {
     private lateinit var adapter: ComentariosAdapter
     lateinit var botonCalificarRestaurante: Button
     lateinit var restaurantName: String
+    lateinit var categoria: String
     var calificacion = 0.0
     private var latitud by Delegates.notNull<Double>()
     private var longitud by Delegates.notNull<Double>()
     lateinit var restaurantId: String
     lateinit var calificacionRestaurante: TextView
     lateinit var direccion: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +59,21 @@ class PerfilRestaurante : AppCompatActivity() {
 
         restaurantId = intent.getStringExtra("restaurantId").toString()
         restaurantName = intent.getStringExtra("restaurantName").toString()
-        restaurantName = intent.getStringExtra("restaurantName").toString()
         calificacion = intent.getDoubleExtra("puntaje",0.0)
         latitud = intent.getDoubleExtra("latitud", 0.0)
         longitud = intent.getDoubleExtra("longitud", 0.0)
+        categoria = intent.getStringExtra("categoria").toString()
         Log.i("DesdePerfilRestaurante", "restaurantId: $restaurantId")
+
+        val imagenRestaurante = findViewById<ImageView>(R.id.imagenRestaurante)
+
+        if(categoria == "Hamburguesa"){
+            imagenRestaurante.setImageResource(R.drawable.restaurant)
+        }else if(categoria == "Sushi"){
+            imagenRestaurante.setImageResource(R.drawable.sushirestaurant)
+        }else if(categoria == "Pizza"){
+            imagenRestaurante.setImageResource(R.drawable.pizzarestaurant)
+        }
 
         val textoNombreRestaurante = findViewById<TextView>(R.id.textoNombreRestaurante)
         calificacionRestaurante = findViewById<TextView>(R.id.Calificacion)
@@ -187,10 +200,16 @@ class PerfilRestaurante : AppCompatActivity() {
         var intentCuenta = Intent(this, Perfil::class.java)
         var intentMiRestaurante = Intent(this, MiRestaurante::class.java)
         var intentInicio = Intent(this, Mapa::class.java)
+        var intentCerrarSesion = Intent(this, InicioSesion::class.java)
         when(item.itemId){
             R.id.Cuenta -> startActivity(intentCuenta)
             R.id.miRestaurante -> startActivity(intentMiRestaurante)
             R.id.Inicio -> startActivity(intentInicio)
+            R.id.cerrarSesion -> {
+                Funciones.clearSesion()
+                intentCerrarSesion.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intentCerrarSesion)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
